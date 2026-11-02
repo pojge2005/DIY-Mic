@@ -1,78 +1,114 @@
-# ESP32-C3 Mini Migration Plan
+# ESP32-C3 Super Mini and Wireless Migration Plan
 
-## Purpose
+## Objective
 
-The current proof of concept uses a NodeMCU ESP8266. The planned next hardware revision will use an ESP32-C3 Mini board while retaining the INMP441 microphone and the Wi-Fi audio receiver concept.
+Move the current DIY-Mic prototype from NodeMCU ESP8266 to an ESP32-C3 Super Mini, retain the INMP441 I²S microphone, and build a small working prototype on zero PCB/perfboard.
 
-This is a planned migration, not a completed port.
+After the ESP32-C3 Wi-Fi version is validated, evaluate BLE and dedicated low-power audio links. This is a future plan; the migration has not yet been completed.
 
-## Why Move to ESP32-C3?
+## Why ESP32-C3?
 
-The ESP32-C3 provides a newer platform for continued firmware development. Espressif documents an I²S peripheral on ESP32-C3 and provides an I²S driver in ESP-IDF. The ESP8266 also has I²S input/output, so the migration is not required simply to make I²S possible.
+The ESP32-C3 provides Wi-Fi, Bluetooth Low Energy (BLE), an I²S peripheral, and low-power operating modes. It is a practical next development board for the project. Refer to the exact board/module datasheet and pinout before wiring.
 
-Potential benefits to evaluate:
+**Bluetooth limitation:** ESP32-C3 supports Bluetooth LE only. It does not support Bluetooth Classic. Do not plan on conventional A2DP headset audio directly from ESP32-C3 without changing the hardware platform.
 
-- A maintained ESP32 software ecosystem and I²S driver.
-- More flexible future firmware structure and debugging.
-- Bluetooth Low Energy availability on ESP32-C3 hardware, if a future feature needs BLE control or provisioning. BLE should not be assumed to replace the current Wi-Fi audio transport.
-- A fresh hardware design with verified power, antenna, and GPIO routing.
+## Target Hardware
 
-The ESP32-C3 is not a drop-in replacement for the ESP8266. The I²S implementation, peripheral driver, GPIO assignment, build target, and network code need to be ported and tested.
+- ESP32-C3 Super Mini development board
+- INMP441 I²S MEMS microphone
+- Zero PCB/perfboard for the first assembled prototype
+- Appropriate 3.3 V power source and decoupling
+- Battery and charging/protection hardware only after power requirements are measured and designed
 
-## Migration Work Plan
+The exact ESP32-C3 Super Mini board revision and pinout must be identified before finalizing GPIO assignments. Do not copy NodeMCU ESP8266 pin labels or low-level I²S code.
+
+## Migration Stages
 
 | Stage | Work | Exit condition |
 |---|---|---|
-| 1 | Select exact ESP32-C3 Mini board/module | Exact board, flash size, antenna and pinout documented |
-| 2 | Confirm power and microphone wiring | 3.3 V supply and I²S electrical connections verified |
-| 3 | Build I²S-only test firmware | Stable microphone samples captured and inspected |
-| 4 | Verify PCM format | Channel, bit alignment, sample rate and amplitude confirmed |
-| 5 | Port Wi-Fi access point and WebSocket | Phone receives valid audio frames |
-| 6 | Reuse or adapt Android receiver | Live playback verified on the new board |
-| 7 | Compare both platforms | Latency, noise, range, stability and current measured |
-| 8 | Select production platform | Decision recorded using measured results |
+| 1 | Identify exact ESP32-C3 Super Mini board | Board revision, module, pinout and flash documented |
+| 2 | Verify microphone power and I²S wiring | Electrical connections checked |
+| 3 | Create I²S-only firmware | Stable raw microphone capture |
+| 4 | Validate PCM | Channel, bit alignment, sample rate and amplitude confirmed |
+| 5 | Port Wi-Fi AP and WebSocket | Android receives valid audio frames |
+| 6 | Build zero-PCB prototype | Stable assembled microphone prototype |
+| 7 | Compare with ESP8266 | Same test procedure and measured results |
+| 8 | Evaluate BLE | Data throughput, latency, phone compatibility and power measured |
+| 9 | Evaluate low-power audio modules | Module and receiver feasibility documented |
+| 10 | Choose wireless architecture | Decision supported by test results |
 
-## Important Compatibility Checks
+## Wireless Options
 
-Before wiring or porting, confirm the exact ESP32-C3 Mini board variant and its pinout. Different boards can expose different GPIOs and have different USB, flash, antenna, and boot-strapping arrangements.
+### Option A — Wi-Fi (baseline)
 
-The ESP32-C3 has one I²S peripheral. Use the ESP-IDF I²S driver or the corresponding supported Arduino-ESP32 API for the selected framework version. Do not copy ESP8266 low-level I²S calls directly into the ESP32-C3 firmware.
+Keep the existing local access point + webpage + WebSocket model for the first ESP32-C3 port. It is the lowest-risk way to reuse the current Android receiver concept.
 
-The INMP441 remains a 3.3 V digital I²S microphone. Recheck the selected board's supply capability, GPIO availability, and signal routing before connecting it.
+Measure:
+- Average and peak current during streaming
+- End-to-end latency
+- Packet loss and jitter
+- Stable range
+- Audio quality and interruptions
 
-## Target Architecture
+### Option B — Bluetooth Low Energy
 
-```mermaid
-flowchart LR
-    A[INMP441] --> B[ESP32-C3 I2S capture]
-    B --> C[PCM processing]
-    C --> D[Audio frame buffer]
-    D --> E[Wi-Fi WebSocket transport]
-    E --> F[Android browser]
-    E --> G[Ubuntu desktop receiver]
-    G --> H[PipeWire virtual microphone]
-```
+Use BLE initially for configuration, start/stop control, status, or other low-rate control functions.
 
-## Platform Comparison
+A custom BLE audio-data experiment may be attempted, but it must demonstrate adequate throughput and stable real-time playback. Android browser compatibility may require a native app or a dedicated receiver rather than the current webpage.
 
-| Area | Current ESP8266 | Planned ESP32-C3 |
-|---|---|---|
-| Current project status | V0.5 Android playback owner-reported working | Not started |
-| I²S | Hardware I²S input/output | Hardware I²S peripheral |
-| Wi-Fi audio transport | Current prototype | To be ported and measured |
-| Firmware API | ESP8266 Arduino core | ESP-IDF or Arduino-ESP32 |
-| GPIO mapping | Existing NodeMCU wiring | Must be selected for exact board |
-| Bluetooth | Not available | BLE capability; not a substitute for Wi-Fi audio without a separate design |
-| Validation | Basic owner-reported prototype tests | No tests yet |
+BLE on ESP32-C3 is not Bluetooth Classic and does not by itself provide standard A2DP microphone/headset functionality.
 
-## Migration Acceptance Criteria
+### Option C — Dedicated low-power wireless/audio module
 
-Do not mark the ESP32-C3 port complete until:
+Evaluate a matched transmitter/receiver solution if the product needs lower power or a dedicated plug-in receiver. Check:
+- Supported audio bandwidth and sample format
+- Codec and end-to-end latency
+- Operating range and interference behavior
+- Transmit/receive current and sleep modes
+- Antenna and module dimensions
+- Receiver availability and interface
+- Cost and documentation
 
-- Microphone capture is stable.
-- Channel selection and sample alignment are verified.
-- PCM sample rate and format match the receiver.
-- Android playback works continuously.
-- Packet loss, jitter, latency, and range are measured.
-- Current consumption is measured.
-- At least one sustained streaming test is completed.
+Do not select a module based only on advertised range or low-power claims.
+
+## Zero-PCB Build Plan
+
+1. Confirm the exact ESP32-C3 Super Mini board.
+2. Map safe, available GPIOs for I²S.
+3. Connect the INMP441 using 3.3 V and common ground.
+4. Add local supply decoupling.
+5. Test I²S capture before adding wireless code.
+6. Add Wi-Fi streaming after PCM is verified.
+7. Assemble the working circuit on zero PCB/perfboard.
+8. Check power integrity, audio noise, wiring robustness, and physical size.
+9. Record photographs, wiring, and test results in the repository.
+
+A zero-PCB build is a prototype assembly, not a manufactured PCB. A custom compact PCB may be designed after the circuit and component choices are stable.
+
+## Battery and Low-Power Development
+
+Do not estimate battery runtime from deep-sleep current alone. A live microphone streaming continuously must keep the microphone, MCU, and radio active. Measure average current in the actual operating mode and calculate runtime using the selected battery capacity, usable discharge range, regulator efficiency, and charging/protection losses.
+
+Evaluate:
+- Wi-Fi modem-sleep and duty-cycle opportunities where audio latency permits
+- BLE connection/advertising intervals for control functions
+- Microphone and regulator current
+- Battery capacity, protection, charging, and safe enclosure
+- Idle, listening, and reconnect power states
+
+## Acceptance Criteria
+
+The ESP32-C3 zero-PCB prototype is accepted when:
+- I²S samples are stable and correctly interpreted.
+- Wi-Fi streaming works with the Android receiver.
+- A sustained stream test completes without unexplained dropouts.
+- Latency, packet loss, range, and current are measured.
+- Wiring and power are documented.
+- The build can be reproduced from repository instructions.
+
+BLE or a dedicated low-power transport is accepted only after separate tests show that it meets the product's audio and receiver requirements.
+
+## References
+
+- [ESP32-C3 Series Datasheet](https://documentation.espressif.com/esp32-c3_datasheet_en.html)
+- [ESP-IDF Bluetooth LE Overview](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/api-guides/ble/overview.html)
