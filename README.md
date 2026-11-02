@@ -92,6 +92,19 @@ The first ESP32-C3 version will retain Wi-Fi streaming as the baseline because i
 
 **Important:** ESP32-C3 does not support Bluetooth Classic. Do not assume it can directly provide a conventional Bluetooth headset/A2DP microphone experience. BLE data transfer is not automatically a standard Bluetooth audio solution. See the [ESP32-C3 Migration Plan](docs/ESP32-C3-MIGRATION.md).
 
+## Receiver Architecture and Options
+
+The receiver strategy evaluates three PC paths: browser-based Wi-Fi playback, native Wi-Fi receiver software with OS virtual microphone integration, and an optional dedicated USB Audio Class receiver dongle. Android browser playback remains the current owner-reported baseline.
+
+![Proposed receiver architecture](hardware/diagrams/receiver-architecture.svg)
+
+See **[Receiver Options and Architecture](docs/RECEIVER-OPTIONS-AND-ARCHITECTURE.md)** for:
+- Android and PC receiver architecture.
+- Browser, native Wi-Fi software, and USB dongle comparison.
+- PCM and optional compressed-audio decoding approaches.
+- Linux PipeWire and Windows integration possibilities.
+- Wireless transport options, power alternatives, test targets, and proposed future repository structure.
+
 ## Development Roadmap
 
 - **V0.5:** ESP8266 + INMP441 Wi-Fi audio prototype — owner-reported working.
