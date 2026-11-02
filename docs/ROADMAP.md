@@ -1,56 +1,84 @@
 # Roadmap
 
-The roadmap tracks prototype milestones. Completion should be based on recorded tests rather than assumptions.
+This roadmap describes the intended development of DIY-Mic. Status is updated as implementation and testing are completed.
 
-| Version | Focus | Status |
-|---|---|---|
-| V0.1 | Initial microphone test | Historical |
-| V0.2 | Signal diagnostics | Historical |
-| V0.3 | Raw I²S diagnostics | Historical |
-| V0.4 | Channel and sample investigation | Historical |
-| V0.5 | Live Android Wi-Fi audio prototype | Owner-reported working |
-| V0.6 | Noise and audio-quality diagnosis | Next |
-| V0.7 | Stream reliability, jitter, and latency | Planned |
-| V0.8 | Ubuntu receiver and PipeWire virtual microphone | Planned |
-| V0.9 | Range and power optimization | Planned |
-| V1.0 | Complete Wi-Fi microphone prototype | Planned |
+| Version | Milestone | Platform / focus | Status |
+|---|---|---|---|
+| V0.1 | Initial microphone test | ESP8266 + INMP441 | Historical |
+| V0.2 | Signal diagnostics | ESP8266 | Historical |
+| V0.3 | Raw I²S diagnostics | ESP8266 | Historical |
+| V0.4 | Channel and sample investigation | ESP8266 | Historical |
+| V0.5 | Live Android Wi-Fi audio | ESP8266 + webpage + WebSocket | Owner-reported working |
+| V0.6 | Noise and audio-quality diagnosis | ESP8266 | Next |
+| V0.7 | Buffering, packet handling and latency | ESP8266 | Planned |
+| V0.8 | Ubuntu receiver and PipeWire virtual microphone | Linux receiver | Planned |
+| V0.9 | Range, current and battery measurements | ESP8266 | Planned |
+| V1.0 | Documented ESP8266 reference prototype | ESP8266 | Planned |
+| V1.1 | I²S and power bring-up | ESP32-C3 Super Mini | Future |
+| V1.2 | Zero-PCB/perfboard microphone assembly | ESP32-C3 Super Mini + INMP441 | Future |
+| V1.3 | Wi-Fi audio port | ESP32-C3 | Future |
+| V1.4 | BLE control and custom audio-data feasibility tests | ESP32-C3 | Future |
+| V1.5 | Dedicated low-power audio module evaluation | Module + matched receiver | Future |
+| V1.6 | Wireless architecture decision | Compare Wi-Fi, BLE and modules | Future |
+| V1.7 | Power, battery and enclosure prototype | Selected platform | Future |
+| V2.0 | Compact DIY-Mic build documentation and release | Validated hardware + receiver | Future |
 
 ## V0.6 — Audio Quality
 
-- Run a quiet-room noise test.
-- Compare power sources.
-- Record the noise character and severity.
-- Verify channel selection and PCM sample extraction.
+- Record quiet-room noise with no speech.
+- Compare clean USB power sources.
+- Record whether the noise is hiss, hum, buzz, or crackle.
+- Verify I²S channel selection and PCM sample extraction.
 
 ## V0.7 — Stream Reliability
 
 - Add packet sequence tracking.
-- Detect missing or out-of-order packets.
+- Detect missing or out-of-order frames.
 - Evaluate receiver buffering.
 - Measure end-to-end latency.
 - Run a 10-minute continuous stream test.
 
 ## V0.8 — Ubuntu Receiver
 
-- Implement a Linux receiver for the Wi-Fi stream.
-- Validate audio playback on Ubuntu.
+- Implement a Linux receiver for the audio stream.
+- Validate desktop playback.
 - Integrate a PipeWire virtual microphone.
-- Test compatibility with common desktop communication applications.
+- Test with desktop communication applications.
 
-## V0.9 — Range and Power
+## V0.9–V1.0 — ESP8266 Reference
 
-- Measure stable range under repeatable conditions.
-- Record current consumption.
-- Evaluate power-source and battery options.
-- Optimize Wi-Fi and audio settings based on measurements.
-
-## V1.0 — Prototype Completion
-
-- Consolidate verified firmware and receiver code.
+- Measure stable range and current consumption.
+- Record battery-runtime estimates from measured operating current.
+- Consolidate verified firmware and receiver source.
 - Document reproducible wiring and setup.
-- Record measured audio, range, latency, and power results.
-- Prepare final assembly documentation.
 
-## Scope Note
+## V1.1–V1.3 — ESP32-C3 Super Mini
 
-The current NodeMCU ESP8266 design uses Wi-Fi. ESP8266 does not provide Bluetooth support, so a Bluetooth receiver would require different hardware.
+- Identify exact board revision and pinout.
+- Verify power and INMP441 wiring.
+- Bring up I²S capture and PCM format.
+- Assemble on zero PCB/perfboard.
+- Port Wi-Fi AP and WebSocket streaming.
+- Repeat Android playback and reliability tests.
+
+## V1.4–V1.6 — Wireless Comparison
+
+- Test BLE for setup and control.
+- Investigate whether custom BLE data transport can meet audio throughput and latency needs.
+- Evaluate dedicated low-power audio modules and their matched receivers.
+- Compare quality, latency, range, current, cost, size, and receiver usability.
+- Select a transport based on measurements.
+
+**Platform note:** ESP32-C3 supports Bluetooth LE, not Bluetooth Classic. BLE is not automatically compatible with standard Bluetooth audio profiles.
+
+## V1.7–V2.0 — Tiny DIY-Mic
+
+- Select battery, regulator, charging and protection components from measured requirements.
+- Optimize microphone and antenna placement.
+- Build a small enclosure.
+- Consider a custom PCB after zero-PCB validation.
+- Publish source, wiring, BOM, build instructions, and test results.
+
+## Completion Policy
+
+A milestone is complete only when the relevant source, measurements, and test evidence are recorded. Planned or experimental features must not be described as working.
