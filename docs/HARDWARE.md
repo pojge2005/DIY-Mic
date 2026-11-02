@@ -17,6 +17,8 @@
 
 ## Planned Prototype: ESP32-C3 Super Mini + INMP441
 
+![Proposed ESP32-C3 SuperMini and INMP441 wiring](../hardware/diagrams/esp32-c3-supermini-inmp441-wiring.png)
+
 The following is a proposed GPIO assignment for the first prototype. It is not yet hardware-validated. Confirm the exact SuperMini board revision and its silkscreen before wiring.
 
 | INMP441 pin | ESP32-C3 SuperMini pin | Purpose |
