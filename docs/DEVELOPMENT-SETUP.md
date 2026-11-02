@@ -175,11 +175,12 @@ Recommended extensions are listed in `.vscode/extensions.json`. Open the reposit
 
 Useful VS Code actions:
 
-- PlatformIO: Build
-- PlatformIO: Upload
-- PlatformIO: Serial Monitor
-- Terminal: Run Python unit tests
-- Source Control: Review local changes before committing
+- Open **Terminal → Run Task** to run the repository tasks.
+- `DIY-Mic: Build ESP8266` builds the serial bring-up project.
+- `DIY-Mic: Upload ESP8266` uploads it to the connected board.
+- `DIY-Mic: Monitor ESP8266` opens the 115200 baud serial monitor.
+- `DIY-Mic: Run Python tests` runs the host-side unit tests.
+- Use Source Control to review local changes before committing.
 
 ## 9. Current hardware wiring reference
 
