@@ -15,6 +15,10 @@ Build the microphone in stages:
 
 The project is intentionally iterative. Hardware, firmware, receiver software, measurements, and decisions will be documented as development continues.
 
+## Architecture Diagram
+
+![DIY-Mic system architecture](hardware/diagrams/system-architecture.png)
+
 ## Current Working Prototype — ESP8266 + Wi-Fi
 
 **Current milestone:** V0.5 — Android live playback reported working by the project owner.
