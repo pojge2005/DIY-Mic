@@ -104,7 +104,7 @@ See **[Receiver Options and Architecture](docs/RECEIVER-OPTIONS-AND-ARCHITECTURE
 
 The current documented development setup is Ubuntu + VS Code + PlatformIO. It records the ESP8266 PlatformIO versions, serial-port checks, build/upload/monitor commands, and hardware notes.
 
-See [Development Setup](docs/DEVELOPMENT-SETUP.md).
+See [Development Setup](docs/DEVELOPMENT-SETUP.md). VS Code build, upload, serial-monitor, and Python-test tasks are available through **Terminal → Run Task**.
 
 ## Tests and Bring-up Code
 
@@ -128,7 +128,8 @@ See [Tests and Diagnostics](tests/README.md) and [ESP8266 Serial Bring-up](firmw
 DIY-Mic/
 ├── .gitignore
 ├── .vscode/
-│   └── extensions.json
+│   ├── extensions.json
+│   └── tasks.json
 ├── README.md
 ├── LICENSE
 ├── docs/
