@@ -98,12 +98,72 @@ The receiver strategy evaluates three PC paths: browser-based Wi-Fi playback, na
 
 ![Proposed receiver architecture](hardware/diagrams/receiver-architecture.svg)
 
-See **[Receiver Options and Architecture](docs/RECEIVER-OPTIONS-AND-ARCHITECTURE.md)** for:
-- Android and PC receiver architecture.
-- Browser, native Wi-Fi software, and USB dongle comparison.
-- PCM and optional compressed-audio decoding approaches.
-- Linux PipeWire and Windows integration possibilities.
-- Wireless transport options, power alternatives, test targets, and proposed future repository structure.
+See **[Receiver Options and Architecture](docs/RECEIVER-OPTIONS-AND-ARCHITECTURE.md)** for the receiver comparison, decoding options, wireless transport, power choices, and proposed future structure.
+
+## Development Environment
+
+The current documented development setup is Ubuntu + VS Code + PlatformIO. It records the ESP8266 PlatformIO versions, serial-port checks, build/upload/monitor commands, and hardware notes.
+
+See [Development Setup](docs/DEVELOPMENT-SETUP.md). VS Code build, upload, serial-monitor, and Python-test tasks are available through **Terminal → Run Task**.
+
+## Tests and Bring-up Code
+
+The repository now contains:
+
+- An ESP8266 PlatformIO serial bring-up project to check the build/upload/serial workflow. It is not the live microphone firmware.
+- A Python raw PCM inspection utility for signed 16-bit little-endian mono PCM.
+- Unit tests for PCM decoding and basic audio metrics.
+
+Run the host-side tests from the repository root:
+
+```bash
+python3 -m unittest discover -s tests -p 'test_*.py' -v
+```
+
+See [Tests and Diagnostics](tests/README.md) and [ESP8266 Serial Bring-up](firmware/esp8266/serial-bringup/README.md).
+
+## Current Repository Structure
+
+```text
+DIY-Mic/
+├── .gitignore
+├── .vscode/
+│   ├── extensions.json
+│   └── tasks.json
+├── README.md
+├── LICENSE
+├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── DEVELOPMENT-SETUP.md
+│   ├── ESP32-C3-MIGRATION.md
+│   ├── EXPERIMENT_LOG.md
+│   ├── HARDWARE.md
+│   ├── PRODUCT-VISION.md
+│   ├── PROJECT_STATUS.md
+│   ├── RECEIVER-OPTIONS-AND-ARCHITECTURE.md
+│   ├── ROADMAP.md
+│   └── TEST_RESULTS.md
+├── firmware/
+│   └── esp8266/
+│       └── serial-bringup/
+│           ├── platformio.ini
+│           ├── README.md
+│           └── src/
+│               └── main.cpp
+├── hardware/
+│   └── diagrams/
+│       ├── esp32-c3-supermini-inmp441-wiring.png
+│       ├── esp8266-inmp441-wiring.png
+│       ├── receiver-architecture.svg
+│       └── system-architecture.png
+└── tests/
+    ├── README.md
+    ├── test_pcm_inspect.py
+    └── tools/
+        └── pcm_inspect.py
+```
+
+Planned receiver, ESP32-C3 firmware, USB dongle, PCB, and hardware test folders will be added when they contain actual implementation files.
 
 ## Development Roadmap
 
@@ -120,15 +180,6 @@ See **[Receiver Options and Architecture](docs/RECEIVER-OPTIONS-AND-ARCHITECTURE
 - **V2.0:** Select the best validated wireless architecture and publish a compact DIY microphone build.
 
 See [Roadmap](docs/ROADMAP.md), [System Architecture](docs/ARCHITECTURE.md), and [Product Vision](docs/PRODUCT-VISION.md).
-
-## Repository Contents
-
-- `docs/` — architecture, hardware, experiments, test results, and future plans.
-- `firmware/` — planned location for verified microcontroller firmware.
-- `receiver/` — planned location for Android-web and desktop receiver code.
-- `hardware/` — planned location for wiring, zero-PCB build notes, and later PCB files.
-
-The exact owner-tested V0.5 firmware and receiver source still need to be imported and reviewed. No placeholder implementation is presented as tested firmware.
 
 ## Development Principle
 
