@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="850" viewBox="0 0 1400 850">
+  <defs>
+    <style>
+      .bg{fill:#f8fafc}.box{fill:#fff;stroke:#334155;stroke-width:2;rx:16}.tx{fill:#dbeafe;stroke:#2563eb;stroke-width:2;rx:16}.rx{fill:#ecfdf5;stroke:#059669;stroke-width:2;rx:16}.usb{fill:#fef3c7;stroke:#d97706;stroke-width:2;rx:16}.txt{font:600 22px Arial,sans-serif;fill:#0f172a}.sub{font:16px Arial,sans-serif;fill:#334155}.line{stroke:#475569;stroke-width:3;fill:none;marker-end:url(#arrow)}.dash{stroke-dasharray:8 7}
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#475569"/></marker>
+  </defs>
+  <rect class="bg" width="1400" height="850"/>
+  <text x="700" y="55" text-anchor="middle" class="txt" font-size="32">DIY-Mic — Proposed Receiver Architecture</text>
+  <rect class="tx" x="480" y="95" width="440" height="120"/>
+  <text x="700" y="140" text-anchor="middle" class="txt">Microphone Transmitter</text>
+  <text x="700" y="175" text-anchor="middle" class="sub">INMP441 → I²S capture → PCM framing</text>
+  <path class="line" d="M700 215 V275"/>
+  <rect class="box" x="480" y="280" width="440" height="100"/>
+  <text x="700" y="320" text-anchor="middle" class="txt">Wireless Transport</text>
+  <text x="700" y="350" text-anchor="middle" class="sub">Wi-Fi baseline • BLE / dedicated link experiments</text>
+  <path class="line" d="M700 380 V435 H220 V485"/>
+  <path class="line" d="M700 435 V485"/>
+  <path class="line" d="M700 435 H1180 V485"/>
+  <rect class="rx" x="55" y="490" width="330" height="145"/>
+  <text x="220" y="535" text-anchor="middle" class="txt">Android Browser</text>
+  <text x="220" y="570" text-anchor="middle" class="sub">WebSocket + Web Audio API</text>
+  <text x="220" y="600" text-anchor="middle" class="sub">Speaker / headphones</text>
+  <rect class="rx" x="535" y="490" width="330" height="145"/>
+  <text x="700" y="535" text-anchor="middle" class="txt">PC Wi-Fi Software</text>
+  <text x="700" y="570" text-anchor="middle" class="sub">Packet decode + jitter buffer</text>
+  <text x="700" y="600" text-anchor="middle" class="sub">Playback + virtual microphone</text>
+  <rect class="usb" x="1015" y="490" width="330" height="145"/>
+  <text x="1180" y="535" text-anchor="middle" class="txt">USB Receiver Dongle</text>
+  <text x="1180" y="570" text-anchor="middle" class="sub">Wireless receiver + USB Audio Class</text>
+  <text x="1180" y="600" text-anchor="middle" class="sub">PC microphone input</text>
+  <path class="line dash" d="M220 635 V700 H700"/>
+  <path class="line dash" d="M700 635 V700"/>
+  <path class="line dash" d="M1180 635 V700 H700"/>
+  <rect class="box" x="400" y="705" width="600" height="95"/>
+  <text x="700" y="745" text-anchor="middle" class="txt">Shared Audio Protocol &amp; Test Strategy</text>
+  <text x="700" y="775" text-anchor="middle" class="sub">PCM format • sequence • buffering • latency • range • reliability</text>
+</svg>
