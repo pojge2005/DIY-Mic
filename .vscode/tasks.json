@@ -1,0 +1,45 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "DIY-Mic: Build ESP8266",
+      "type": "shell",
+      "command": "pio",
+      "args": ["run"],
+      "options": {
+        "cwd": "${workspaceFolder}/firmware/esp8266/serial-bringup"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "DIY-Mic: Upload ESP8266",
+      "type": "shell",
+      "command": "pio",
+      "args": ["run", "-t", "upload"],
+      "options": {
+        "cwd": "${workspaceFolder}/firmware/esp8266/serial-bringup"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "DIY-Mic: Monitor ESP8266",
+      "type": "shell",
+      "command": "pio",
+      "args": ["device", "monitor", "--baud", "115200"],
+      "options": {
+        "cwd": "${workspaceFolder}/firmware/esp8266/serial-bringup"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "DIY-Mic: Run Python tests",
+      "type": "shell",
+      "command": "python3",
+      "args": ["-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py", "-v"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}
