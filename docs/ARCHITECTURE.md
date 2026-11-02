@@ -1,67 +1,114 @@
 # System Architecture
 
-## Current Prototype — ESP8266
+## 1. Current Prototype: ESP8266 Wi-Fi Audio
 
-The current prototype uses the NodeMCU ESP8266 and INMP441 digital MEMS microphone. The ESP8266 creates a Wi-Fi access point and sends PCM audio to an Android browser over WebSocket.
+The current prototype uses a NodeMCU ESP8266 and an INMP441 I²S MEMS microphone. The ESP8266 creates a local Wi-Fi access point. An Android phone connects to it and listens through a webpage served by the ESP8266.
 
 ```mermaid
 flowchart TD
-    A[INMP441 MEMS microphone] -->|I2S: BCLK, WS, SD| B[NodeMCU ESP8266]
+    A[INMP441 MEMS microphone] -->|I2S BCLK / WS / SD| B[NodeMCU ESP8266]
     B --> C[I2S capture and sample conversion]
     C --> D[PCM audio frames]
     D --> E[WebSocket server]
     E --> F[ESP8266 Wi-Fi access point]
-    F --> G[Android phone connects to AP]
-    G --> H[Browser WebSocket client]
-    H --> I[Web Audio API]
-    I --> J[Phone speaker or headphones]
+    F --> G[Android phone connects]
+    G --> H[HTTP page: 192.168.4.1]
+    H --> I[Browser WebSocket client]
+    I --> J[Web Audio API]
+    J --> K[Phone speaker or headphones]
 ```
 
-### Network Endpoints
+### Current connection details
 
-| Service | Address |
-|---|---|
-| HTTP receiver page | `http://192.168.4.1` |
-| WebSocket server | Port `81` |
-| Default ESP8266 SoftAP address | `192.168.4.1` |
+- HTTP receiver page: `http://192.168.4.1`
+- WebSocket server: port `81`
+- Phone joins the ESP8266 access point directly.
+- No external Wi-Fi router or internet connection is needed.
 
-The phone connects directly to the ESP8266 access point. Internet access is not required for this local prototype.
-
-## Audio Data Path
+### Current audio path
 
 1. INMP441 outputs digital audio over I²S.
-2. ESP8266 captures I²S data.
-3. Firmware selects and converts the microphone samples into PCM.
-4. Firmware groups samples into audio frames.
-5. Frames are transmitted through WebSocket over Wi-Fi.
-6. The Android browser receives frames and schedules playback through the Web Audio API.
+2. ESP8266 captures the I²S data.
+3. Firmware converts selected samples into PCM audio.
+4. Firmware groups samples into frames.
+5. Frames are sent over WebSocket through the local Wi-Fi network.
+6. The Android browser receives and plays the audio using Web Audio API.
 
-Sample format, frame size, sample rate, and buffering must be kept consistent between sender and receiver. The exact V0.5 firmware source still needs to be added and reviewed before these implementation details can be treated as source-verified.
+The exact V0.5 source must be added and reviewed before sample rate, frame format, buffering, and implementation details are treated as source-verified.
 
-## Future Platform — ESP32-C3 Mini
+## 2. Next Prototype: ESP32-C3 Super Mini
 
-The intended hardware evolution is:
+The next hardware milestone is an ESP32-C3 Super Mini connected to the same INMP441 microphone. The first build is planned for zero PCB/perfboard to validate the circuit and firmware before miniaturization.
 
 ```mermaid
 flowchart TD
-    A[INMP441 microphone] --> B[ESP32-C3 Mini]
+    A[INMP441] -->|I2S| B[ESP32-C3 Super Mini]
     B --> C[I2S RX driver]
-    C --> D[PCM processing and buffering]
-    D --> E[Wi-Fi transport]
-    E --> F[Android receiver]
-    E --> G[Ubuntu receiver]
-    G --> H[PipeWire virtual microphone]
+    C --> D[PCM processing]
+    D --> E[Audio frame buffer]
+    E --> F[Wi-Fi transport]
+    F --> G[Android web receiver]
+    F --> H[Ubuntu receiver]
+    H --> I[PipeWire virtual microphone]
 ```
 
-The application-level data format and receiver protocol should remain as consistent as practical. The I²S driver, pin mapping, Wi-Fi setup, memory handling, and build configuration will be platform-specific.
+Keep Wi-Fi as the first ESP32-C3 transport target so the receiver can be reused as much as practical. The I²S driver, GPIO assignments, build target, and platform-specific network code must be ported and validated.
 
-## Design Boundaries
+## 3. Wireless Technology Exploration
 
-Keep these responsibilities separate as the firmware grows:
+The project will compare more than one way to send microphone audio. The correct choice depends on audio quality, latency, range, power consumption, receiver compatibility, cost, and hardware size.
 
-- **Audio capture:** I²S configuration and microphone sample reading.
-- **Audio processing:** channel selection, sample conversion, gain, and optional filtering.
-- **Transport:** Wi-Fi access point/client mode and WebSocket packet delivery.
-- **Receiver:** browser or desktop playback and buffering.
+```mermaid
+flowchart TD
+    A[Microphone and MCU] --> B{Transport evaluation}
+    B --> C[Wi-Fi]
+    B --> D[Bluetooth Low Energy]
+    B --> E[Dedicated low-power audio module]
+    C --> F[Phone / PC network receiver]
+    D --> G[BLE-capable phone app or receiver]
+    E --> H[Matched receiver hardware]
+    F --> I[Compare quality, latency, range, power and cost]
+    G --> I
+    H --> I
+    I --> J[Select architecture using measured results]
+```
 
-This separation will make it easier to move from ESP8266 to ESP32-C3 without assuming that low-level peripheral code is portable.
+### Wi-Fi
+
+Current working approach. A local access point and WebSocket stream provide a simple browser-based receiver. Power consumption and range must be measured.
+
+### Bluetooth Low Energy
+
+ESP32-C3 supports Bluetooth LE, but not Bluetooth Classic. BLE may be useful for setup, control, configuration, and low-rate data. Continuous microphone audio over a custom BLE data service must be prototyped and measured. It is not automatically compatible with standard Bluetooth headset or A2DP audio.
+
+### Dedicated low-power audio link
+
+A separate low-power transmitter/receiver pair may be evaluated if Wi-Fi power use is too high or a small standalone microphone-to-receiver system is required. The selected module must be checked for audio bandwidth, latency, codec, range, power, antenna, and receiver availability.
+
+## 4. Product Build Stages
+
+```mermaid
+flowchart TD
+    A[ESP8266 breadboard / jumper prototype] --> B[Stable Wi-Fi audio proof of concept]
+    B --> C[ESP32-C3 Super Mini validation]
+    C --> D[Zero PCB / perfboard microphone prototype]
+    D --> E[Audio and power optimization]
+    E --> F[Wireless technology selection]
+    F --> G[Compact assembly and enclosure]
+    G --> H[Optional custom PCB revision]
+    H --> I[Documented DIY-Mic build]
+```
+
+Zero PCB/perfboard is the planned first compact prototype platform. A custom PCB is a later improvement, not a prerequisite for the first ESP32-C3 build.
+
+## 5. Design Boundaries
+
+Keep these responsibilities separate:
+
+- Audio capture: I²S setup and microphone sample reading.
+- Audio processing: channel selection, sample conversion, gain, and optional filtering.
+- Transport: Wi-Fi, BLE, or a dedicated wireless module.
+- Receiver: browser, desktop application, or matched receiver hardware.
+- Power: regulation, battery charging/protection, runtime measurement, and power modes.
+
+This separation allows the microphone and receiver software to evolve without coupling all features to one wireless protocol.
