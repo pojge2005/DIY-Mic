@@ -2,58 +2,53 @@
 
 ## Required experience
 
-The browser receiver must provide both live audio playback and live visualization. The dashboard is not a telemetry-only tool.
+The initial receiver must connect to the DIY-Mic local Wi-Fi network, open a WebSocket connection and play live audio. Visualization is optional until confirmed as a product requirement.
 
 ## Browser API roles
 
-- Web Bluetooth: device discovery, GATT connection, reads, writes and notifications.
-- Web Audio API: playback and analysis.
-- AudioWorklet: audio rendering and processing without relying on UI frame timing.
-- Canvas or equivalent rendering: waveform and frequency spectrum display.
-- PWA caching: optionally cache the receiver assets for offline launch after the first successful load.
+- Wi-Fi: user joins the ESP32-C3 SoftAP through the phone or computer network settings.
+- WebSocket: receives binary audio frames and sends control messages.
+- Web Audio API: schedules and plays PCM audio.
+- AudioWorklet: optional robust audio rendering path if needed after the first playback prototype.
+- Canvas: optional waveform and spectrum display.
+- PWA caching: optional; useful if the receiver page must remain available without internet.
 
 ## Runtime flow
 
-1. User opens the receiver from a secure HTTPS origin.
-2. User taps Connect and selects DIY-Mic.
-3. Browser requests the required BLE service.
-4. Receiver discovers characteristics and subscribes to notifications.
-5. User starts microphone capture.
-6. Audio fragments are validated and reconstructed.
-7. Reconstructed PCM enters a bounded jitter buffer.
-8. AudioWorklet consumes audio for playback.
-9. Analysis worker/main processing calculates waveform, RMS, peak and FFT.
-10. UI displays audio and connection statistics.
+1. User powers the microphone.
+2. ESP32-C3 starts its SoftAP.
+3. User joins the DIY-Mic Wi-Fi network.
+4. User opens the receiver page.
+5. Receiver connects to the WebSocket endpoint.
+6. User starts the stream.
+7. Receiver validates frames and sequence numbers.
+8. PCM enters a bounded jitter buffer.
+9. Web Audio plays the audio through the selected output device.
+10. Receiver displays connection and stream state.
 
-## Dashboard controls
+## Receiver controls
 
 - Connect / disconnect.
-- Start / stop capture.
+- Start / stop stream.
 - Mute / unmute playback.
 - Playback volume.
-- Waveform and spectrum display.
-- RMS and peak indicators.
-- BLE state, sample format and stream state.
-- Received frames, missing frames, malformed packets and buffer underruns.
+- Connection and stream status.
+- Received frames, missing frames and buffer underruns.
+- Optional waveform, spectrum, RMS and peak.
 
-## Compatibility constraints
+## Hosting decision
 
-Web Bluetooth is not universally supported. The first target matrix is:
-- Android: Chrome, verify on the actual phone and OS version.
-- Ubuntu: Chrome or another Chromium-based browser, verify actual Web Bluetooth availability.
-- Safari and Firefox: not supported by the standard Web Bluetooth API at the time of this baseline.
+The receiver UI may be served directly by the ESP32-C3 or hosted separately and opened while connected to the SoftAP. This must be decided before implementation. If served from the ESP32, keep assets small and account for available flash. If hosted separately, confirm that the browser can still reach the ESP32 WebSocket endpoint while connected to its AP.
 
-The receiver must detect unsupported browsers and show a clear message. Do not promise iOS Safari support through Web Bluetooth. A future native receiver may be required for unsupported platforms.
+## Internet and phone behavior
 
-## Internet independence
+The local audio data path does not require internet. Some phones may warn that the Wi-Fi network has no internet and may switch back to mobile data or another network. Test the target Android device and document the steps to remain connected to the local device.
 
-The BLE audio connection itself does not require internet. The web application must be loaded from a secure origin. A PWA/service worker may cache static assets for offline use after the initial load. Device discovery and audio transfer remain local BLE operations.
+## Playback constraints
 
-## Audio implementation constraints
-
-- Do not perform expensive drawing or FFT work inside the AudioWorklet render callback.
-- Use a bounded queue between BLE event handling and audio processing.
-- Prevent unbounded memory growth if notifications arrive faster than playback.
-- Expose underruns, dropped frames and reconnects in the UI.
-- Handle browser audio autoplay/user-gesture restrictions.
-- Do not claim low latency until measured end-to-end on target devices.
+- Handle browser audio autoplay restrictions with a user gesture.
+- Bound all audio queues.
+- Keep UI rendering out of the real-time audio rendering path.
+- Expose reconnects, dropped frames and underruns.
+- Measure actual end-to-end latency.
+- Do not promise background playback or locked-screen behavior until tested on target browsers.

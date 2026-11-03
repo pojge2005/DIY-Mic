@@ -1,73 +1,54 @@
 # DIY-Mic V0.7.0 Roadmap
 
-This roadmap is specific to the ESP32-C3 Bluetooth-first branch. It supersedes earlier transport-priority suggestions for this version, while preserving the repository's V0.5/V0.6 history.
+This roadmap uses the selected ESP32-C3 Wi-Fi SoftAP + WebSocket direction. V0.5/V0.6 remain historical and untouched.
 
 | Phase | Deliverable | Exit condition |
 |---|---|---|
-| 0 | Documentation and hardware audit | Board, mic, wiring and unresolved questions reviewed |
-| 1 | PlatformIO board baseline | Clean project compiles and serial diagnostics work |
-| 2 | I²S-only capture | Stable samples; bit alignment, channel and rate verified |
-| 3 | PCM and frame baseline | Correct PCM files/metrics and bounded frame buffers |
-| 4 | BLE discovery and control | Browser connects, reads state and sends commands |
-| 5 | BLE throughput benchmark | Sustained throughput and packet behavior measured |
-| 6 | BLE audio transport | PCM frames reconstructed without unacceptable loss |
-| 7 | Browser audio playback | Live audio audible with measured latency |
-| 8 | Browser visualization | Waveform, RMS, peak and FFT work during playback |
-| 9 | Reliability and recovery | 30-minute test and reconnect test pass |
-| 10 | Optional Wi-Fi comparison | Local SoftAP tested independently if BLE misses requirements |
-| 11 | Power and physical prototype | Current measured; zero-PCB assembly documented |
+| 0 | Documentation and hardware audit | Board, mic, wiring and receiver decisions reviewed |
+| 1 | Clean PlatformIO board baseline | Build and serial diagnostics pass |
+| 2 | I²S-only capture | Stable samples; channel, alignment and rate verified |
+| 3 | PCM and buffering | Correct PCM and bounded queues |
+| 4 | Wi-Fi SoftAP | Phone/PC can join and maintain local connection |
+| 5 | WebSocket control | Receiver connects and start/stop/status work |
+| 6 | Audio streaming | Sustained binary PCM stream without unacceptable loss |
+| 7 | Browser playback | Live audio plays with measured latency |
+| 8 | Reliability | 30-minute stream and reconnect tests pass |
+| 9 | Optional visualization | Waveform/FFT/meters, only if approved |
+| 10 | Power and physical prototype | Current measured and assembly documented |
 
 ## Phase 0 — Before coding
-- Read the existing repository documents and V0.6 logs.
-- Confirm exact ESP32-C3 Super Mini board revision.
-- Confirm INMP441 breakout model and existing components.
-- Verify GPIO wiring and USB serial behavior.
-- Agree audio quality and latency acceptance targets.
-- Review the open items document.
+
+- Review the existing repository documentation and V0.6 logs.
+- Confirm ESP32-C3 Super Mini and INMP441 breakout details.
+- Physically verify the proposed GPIO wiring.
+- Confirm Android and Ubuntu/PC receiver targets.
+- Decide where the receiver page will be hosted.
+- Approve the first audio benchmark and acceptance criteria.
 
 ## Phase 1 — Board baseline
-- Create a minimal PlatformIO project in this version folder.
-- Confirm board ID, platform and framework.
-- Print chip, flash, reset reason and firmware version.
-- Confirm USB CDC upload and monitor.
-- Do not enable audio or wireless yet.
+
+Create a clean PlatformIO project, confirm board/framework versions, print chip and reset diagnostics, and verify USB CDC. Do not enable I²S or Wi-Fi yet.
 
 ## Phase 2 — I²S capture
-- Configure the current proposed GPIO map only after physical verification.
-- Capture silence and speech.
-- Verify left/right slot and bit alignment.
-- Measure effective sample rate and sample amplitude.
-- Save test captures and analysis.
+
+Use the verified pin map. Capture silence and speech. Verify channel slot, sample alignment and effective sample rate. Record DC offset, RMS, peak and DMA errors.
 
 ## Phase 3 — PCM and buffering
-- Convert to signed 16-bit mono PCM for the initial benchmark.
-- Assemble 10 ms logical frames.
-- Verify sequence and sample counts.
-- Test queue overflow and capture continuity.
 
-## Phase 4 — BLE control
-- Implement advertising, GATT discovery and start/stop commands.
-- Test Android Chrome and Ubuntu Chromium.
-- Exchange status and capability information before sending audio.
+Start with proposed mono 16 kHz signed 16-bit PCM. Assemble 10 ms logical frames. Verify sequence and sample counts. Test queue-full behavior and capture continuity.
 
-## Phase 5 — BLE benchmark
-- Measure negotiated MTU, usable payload, notification throughput, packet gaps and current.
-- Test multiple connection intervals and PHY options where supported.
-- Benchmark actual browser/device pairs, not only ESP32-to-ESP32 examples.
-- Decide whether 16 kHz / 16-bit mono PCM is feasible.
+## Phase 4–5 — Network baseline
 
-## Phase 6–8 — Audio and receiver
-- Implement packet framing and fragmentation.
-- Add browser jitter buffer and AudioWorklet playback.
-- Add waveform and FFT from received samples.
-- Tune buffering against measured latency and glitches.
+Start SoftAP and verify phone/PC connectivity. Implement minimal WebSocket control. Verify status, start, stop and disconnect/reconnect before sending audio.
 
-## Phase 9 — Reliability
-- Run 30-minute continuous streaming.
-- Test disconnect/reconnect, out-of-range recovery and receiver page reload.
-- Record packet loss, underruns and audio artifacts.
+## Phase 6–7 — Streaming and playback
 
-## Phase 10–11 — Optional comparison and prototype
-- If BLE fails the accepted requirements, evaluate local Wi-Fi SoftAP as a separate direct link. Internet is not required for SoftAP.
-- Compare latency, quality, range, current and usability.
-- Assemble zero-PCB only after the electrical and firmware baseline is stable.
+Send binary audio frames. Add receiver validation and bounded jitter buffering. Play PCM through Web Audio. Measure end-to-end latency and audio artifacts.
+
+## Phase 8 — Reliability
+
+Run a 30-minute continuous stream. Test receiver reload, Wi-Fi disconnect/reconnect and no-client behavior. Record dropped frames, queue high-water mark, underruns and current.
+
+## Phase 9–10 — Optional enhancements
+
+Add waveform/FFT only if approved and only after playback is stable. Measure current in idle, capture-only, SoftAP-only and streaming modes. Assemble the compact physical prototype after jumper-wire bring-up passes.

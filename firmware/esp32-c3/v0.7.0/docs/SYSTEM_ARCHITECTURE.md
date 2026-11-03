@@ -1,61 +1,53 @@
-# System Architecture — Bluetooth First
+# System Architecture — Wi-Fi SoftAP + WebSocket
 
 ## System boundary
 
-The microphone transmitter and receiver communicate directly. The internet is not part of the runtime data path.
+The ESP32-C3 creates a local Wi-Fi access point. A phone or PC connects directly to it. The receiver opens a WebSocket connection to the ESP32-C3 and receives audio frames. No internet connection or external router is required.
 
 ```mermaid
 flowchart TD
     MIC[INMP441 I2S microphone] --> MCU[ESP32-C3 Super Mini]
     MCU --> CAP[I2S capture and PCM conversion]
     CAP --> BUF[Bounded audio frame buffer]
-    BUF --> BLE[BLE GATT audio data]
-    MCU --> TEL[BLE control and telemetry]
-    BLE --> RX[Browser BLE receiver]
-    TEL --> RX
-    RX --> JIT[Jitter buffer and packet reconstruction]
+    BUF --> WS[WebSocket audio server]
+    MCU --> AP[Wi-Fi SoftAP]
+    AP --> CLIENT[Phone or PC joins local network]
+    CLIENT --> RX[Browser receiver]
+    WS --> RX
+    RX --> JIT[Frame validation and jitter buffer]
     JIT --> PLAY[Web Audio playback]
-    JIT --> FFT[Waveform and FFT analysis]
-    PLAY --> OUT[Phone or laptop audio output]
-    FFT --> UI[Web dashboard]
-    WIFI[Optional local Wi-Fi transport] -. later experiment .-> RX
+    PLAY --> OUT[Phone or PC speaker/headphones]
+    RX -. optional analysis .-> VIZ[Waveform / FFT / meters]
 ```
 
-## Responsibilities
+## ESP32-C3 transmitter responsibilities
 
-### ESP32-C3 transmitter
-- Capture digital audio from INMP441 using I²S RX.
-- Convert the microphone's native sample representation into a defined transport PCM format.
-- Assemble bounded, sequenced audio frames.
-- Send audio through a custom BLE GATT data characteristic.
-- Expose a separate control/telemetry characteristic.
-- Report buffer, capture and transport faults.
+- Configure Wi-Fi SoftAP with a documented SSID and configurable credentials.
+- Serve or expose receiver connection information.
+- Capture INMP441 audio through I²S RX.
+- Convert microphone samples to a defined transport PCM format.
+- Assemble sequenced audio frames in bounded buffers.
+- Send frames to the WebSocket client without blocking I²S capture.
+- Expose connection, capture and buffer diagnostics.
+- Recover cleanly from receiver disconnects.
 
-### BLE connection
-- Advertising and device discovery.
-- GATT connection and service discovery.
-- Capability and audio configuration exchange.
-- Audio notifications.
-- Control writes and telemetry notifications.
+## Receiver responsibilities
 
-### Browser receiver
-- Connect using Web Bluetooth.
-- Subscribe to BLE notifications.
-- Validate and reassemble audio frames.
-- Track sequence gaps and late packets.
+- Join the DIY-Mic SoftAP.
+- Open the configured WebSocket endpoint.
+- Receive and validate binary audio frames.
+- Handle sequence gaps and reconnects.
 - Feed a bounded jitter buffer.
-- Play through Web Audio API / AudioWorklet.
-- Calculate waveform, RMS, peak and FFT.
-- Render status and diagnostics independently of audio rendering.
+- Play audio using Web Audio API.
+- Show connection and stream status.
+- Optional: waveform, FFT, RMS and peak visualization.
 
-## Wireless policy
+## Network policy
 
-BLE is the default and primary connection. Wi-Fi is optional and disabled in the normal BLE mode. Wi-Fi may later be evaluated as a direct local SoftAP connection; it does not require internet, but it shares the ESP32-C3 2.4 GHz radio with BLE and simultaneous performance must be measured.
+The ESP32-C3 SoftAP is the default V0.7.0 connection. The local audio path is independent of internet access. Do not assume the phone can simultaneously retain mobile data or another Wi-Fi network while connected to the device; behavior varies by OS and device and must be tested.
 
-## Important platform limitation
-
-ESP32-C3 supports Bluetooth LE, not Bluetooth Classic. This design is a custom BLE data application. It is not a standard Bluetooth headset, A2DP microphone or Bluetooth LE Audio endpoint.
+BLE is not part of the initial audio transport. It may be evaluated later for discovery or control only if it provides a clear benefit.
 
 ## Performance boundary
 
-BLE application throughput is lower than the PHY bit rate and depends on negotiated MTU, data length, connection interval, phone implementation, retransmissions and radio conditions. Published or laboratory throughput figures are not project acceptance evidence. The actual board-to-browser path must be benchmarked.
+Actual application throughput, packet timing, TCP/WebSocket buffering, radio range, current consumption and latency must be measured on the target board and receiver. Wi-Fi link rate is not equivalent to delivered audio throughput.
