@@ -12,7 +12,7 @@ The target is a roughly 20 mm-class zero-PCB assembly where practical. The ESP32
 |---|---|---:|---|
 | U1 | ESP32-C3 Super Mini | 1 | Common 16-pad Super Mini layout; verify exact revision |
 | MIC1 | INMP441 I²S microphone breakout | 1 | 3.3 V compatible; confirm breakout pin labels |
-| C1 | 100 nF ceramic capacitor, X7R or better | 1 | Place directly between microphone VDD and GND |
+| C1 | 100 nF ceramic capacitor, X7R or better | 0–1 | Fit directly between microphone VDD and GND only if the breakout does not already have local 100 nF decoupling |
 | R1 | 100 kΩ resistor | 1 | SD-to-GND pull-down, only if not already fitted on the microphone breakout |
 | — | Short insulated wire / 2.54 mm headers as needed | — | Keep I²S and power connections short |
 
