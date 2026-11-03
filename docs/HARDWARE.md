@@ -23,7 +23,7 @@ The first ESP32-C3 revision is intentionally minimal. Populate only:
 
 - ESP32-C3 Super Mini
 - INMP441 microphone breakout
-- C1: 100 nF X7R directly across microphone VDD/GND
+- C1: ensure 100 nF X7R local decoupling across microphone VDD/GND; add only if absent on the breakout
 - R1: 100 kΩ from SD to GND only if not already present on the breakout
 - Short wiring; USB-C powers the board during development
 
