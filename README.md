@@ -83,7 +83,7 @@ The first ESP32-C3 version will retain Wi-Fi streaming as the baseline because i
 
 ## Minimal ESP32-C3 Prototype
 
-The next hardware build is intentionally small: **ESP32-C3 Super Mini + INMP441 + one local 100 nF microphone decoupling capacitor**. No display, sensor array, buttons, GPIO expander, or battery charger is included in the first circuit. The target is a roughly 20 mm-class zero-PCB assembly, subject to the actual module dimensions and USB/antenna clearance.
+The next hardware build is intentionally small: **ESP32-C3 Super Mini + INMP441 + the microphone's required local 100 nF decoupling (add it only if the breakout does not already have it)**. No display, sensor array, buttons, GPIO expander, or battery charger is included in the first circuit. The target is a roughly 20 mm-class zero-PCB assembly, subject to the actual module dimensions and USB/antenna clearance.
 
 ![Minimal ESP32-C3 microphone circuit](hardware/diagrams/esp32-c3-minimal-mic.svg)
 
