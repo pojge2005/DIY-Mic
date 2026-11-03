@@ -105,7 +105,7 @@ The GPIO table above is the **long-term allocation plan**, not a requirement to 
 
 - ESP32-C3 Super Mini
 - INMP441 I²S microphone breakout
-- One 100 nF X7R capacitor at the microphone supply pins
+- Ensure 100 nF X7R local decoupling at the microphone supply pins (add only if absent on the breakout)
 - One 100 kΩ SD pull-down only if not already fitted on the breakout
 - Short wiring and USB-C development power
 
