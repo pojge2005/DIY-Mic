@@ -85,7 +85,15 @@ ESP32-C3 supports Bluetooth LE, but not Bluetooth Classic. BLE may be useful for
 
 A separate low-power transmitter/receiver pair may be evaluated if Wi-Fi power use is too high or a small standalone microphone-to-receiver system is required. The selected module must be checked for audio bandwidth, latency, codec, range, power, antenna, and receiver availability.
 
-## 4. Product Build Stages
+## 4. Minimal First Hardware Revision
+
+The first ESP32-C3 assembly is deliberately limited to the MCU board and one INMP441 digital microphone. USB-C powers the Super Mini during development; its 3.3 V rail powers the microphone. Add one 100 nF X7R capacitor directly across the microphone supply pins. Fit a 100 kΩ SD pull-down only if the microphone breakout does not already contain it.
+
+No display, buttons, sensors, I²C expander, external ADC, battery charger, or extra regulator belongs on this first build. Future peripherals are separate optional modules and must not increase the initial circuit complexity.
+
+The proposed compact target is approximately 20 mm class, but actual fit depends on the Super Mini and microphone breakout dimensions. Keep USB access, antenna clearance, microphone acoustic access, and safe solder spacing. See [Minimal Circuit and BOM](ESP32-C3-MINI-CIRCUIT.md) and [wiring diagram](../hardware/diagrams/esp32-c3-minimal-mic.svg).
+
+## 5. Product Build Stages
 
 ```mermaid
 flowchart TD
@@ -101,7 +109,7 @@ flowchart TD
 
 Zero PCB/perfboard is the planned first compact prototype platform. A custom PCB is a later improvement, not a prerequisite for the first ESP32-C3 build.
 
-## 5. Design Boundaries
+## 6. Design Boundaries
 
 Keep these responsibilities separate:
 

@@ -59,6 +59,14 @@ This roadmap describes the intended development of DIY-Mic. Status is updated as
 
 ## V1.1–V1.3 — ESP32-C3 Super Mini
 
+- Keep the first circuit minimal: Super Mini + INMP441 + local 100 nF decoupling (use the breakout's existing capacitor if present).
+- Follow the [minimal circuit and component list](ESP32-C3-MINI-CIRCUIT.md).
+- Target a roughly 20 mm-class zero-PCB assembly only after checking actual module dimensions.
+- Keep all additional sensors and expansion ICs off the first revision.
+- Use USB-C power for bring-up; add power filtering only when measurements justify it.
+
+
+
 - Identify exact board revision and pinout.
 - Verify power and INMP441 wiring.
 - Bring up I²S capture and PCM format.

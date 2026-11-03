@@ -38,6 +38,18 @@ These results are observations from a prototype test. They have not yet been sup
 
 The host-side Python unit tests have been run successfully. The ESP8266 serial bring-up firmware has not yet been built or tested on physical hardware as part of this repository update.
 
+## Next Hardware Revision — Minimal ESP32-C3 Build
+
+The next hardware build is planned as a small, minimal circuit: ESP32-C3 Super Mini + INMP441 breakout + local 100 nF X7R decoupling (add only if the breakout does not already include it). A 100 kΩ SD pull-down is fitted only if it is not already present on the microphone breakout.
+
+No display, buttons, sensors, external ADC, GPIO expander, battery charger, or extra regulator is included in this first revision. USB-C is the development power source. The target is roughly 20 mm class, subject to actual board/module dimensions and safe USB/antenna/acoustic clearances.
+
+The proposed GPIO mapping is GPIO3 = I²S SD, GPIO4 = BCLK, GPIO5 = WS; GPIO18/19 remain native USB and GPIO20/21 are UART0. The mapping has not yet been physically validated.
+
+Noise reduction starts with correct local 100 nF decoupling, short wiring, common ground, clean USB supply comparison, and PCM captures. No capacitors are to be added to I²S signal lines. Optional 4.7–10 µF local bulk capacitance is measurement-driven only.
+
+See [Minimal Circuit and BOM](ESP32-C3-MINI-CIRCUIT.md) and [GPIO Migration Plan](ESP32-C3-MIGRATION.md).
+
 ### Known Engineering Gaps
 
 - Import and review the exact owner-tested V0.5 firmware and webpage source.

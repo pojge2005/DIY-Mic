@@ -81,6 +81,18 @@ flowchart TD
 
 The first ESP32-C3 version will retain Wi-Fi streaming as the baseline because it is closest to the working prototype. BLE and other low-power options are research items, not confirmed replacements.
 
+## Minimal ESP32-C3 Prototype
+
+The next hardware build is intentionally small: **ESP32-C3 Super Mini + INMP441 + the microphone's required local 100 nF decoupling (add it only if the breakout does not already have it)**. No display, sensor array, buttons, GPIO expander, or battery charger is included in the first circuit. The target is a roughly 20 mm-class zero-PCB assembly, subject to the actual module dimensions and USB/antenna clearance.
+
+![Minimal ESP32-C3 microphone circuit](hardware/diagrams/esp32-c3-minimal-mic.svg)
+
+- [Minimal circuit, component list, power/noise guidance and expansion plan](docs/ESP32-C3-MINI-CIRCUIT.md)
+- [ESP32-C3 GPIO allocation and migration checklist](docs/ESP32-C3-MIGRATION.md)
+- [Hardware and wiring reference](docs/HARDWARE.md)
+
+The first build uses USB-C power, the Super Mini's 3.3 V rail, INMP441 I²S on GPIO3/4/5, and short wiring. Future peripherals remain optional add-ons; do not populate them on the tiny first revision.
+
 ## Wireless Technology Strategy
 
 | Technology | Intended evaluation | Important consideration |
