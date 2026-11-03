@@ -112,3 +112,75 @@ BLE or a dedicated low-power transport is accepted only after separate tests sho
 
 - [ESP32-C3 Series Datasheet](https://documentation.espressif.com/esp32-c3_datasheet_en.html)
 - [ESP-IDF Bluetooth LE Overview](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/api-guides/ble/overview.html)
+
+## ESP32-C3 SuperMini GPIO Allocation (Development Proposal)
+
+This allocation targets the ESP32-C3 SuperMini with **no display**. It supports the current project microphone and the previously listed expansion peripherals: DHT11, PIR, ultrasonic distance sensor, GPS, LDR, MQ gas sensor, and four push buttons. It also preserves USB and UART debugging.
+
+**Important:** This is a board-level design proposal, not a physically validated wiring map. Confirm the exact SuperMini revision, exposed header labels, and module schematic before soldering. GPIO numbers below are ESP32-C3 GPIO numbers, not NodeMCU labels.
+
+### Direct GPIO map
+
+| Function | ESP32-C3 GPIO | Connection / notes |
+|---|---:|---|
+| INMP441 BCLK / SCK | GPIO4 | I²S bit clock |
+| INMP441 WS / LRCLK | GPIO5 | I²S word select |
+| INMP441 SD | GPIO3 | I²S data input |
+| INMP441 L/R | GND | Select left channel |
+| I²C SDA | GPIO0 | Shared expansion bus |
+| I²C SCL | GPIO1 | Shared expansion bus |
+| DHT11 data | GPIO10 | 3.3 V logic; use an appropriate pull-up |
+| PIR output | GPIO6 | Verify the PIR output is 3.3 V-compatible |
+| Ultrasonic TRIG | GPIO7 | Trigger output |
+| Ultrasonic ECHO | GPIO2 | **Only through a boot-safe 3.3 V buffer/level-shifter circuit**; see restrictions below |
+| UART0 RX (debug) | GPIO20 | External UART adapter TX connects here |
+| UART0 TX (debug) | GPIO21 | External UART adapter RX connects here |
+| USB debugging/programming | Native USB connector | Uses the chip's USB Serial/JTAG interface; preserve the USB data path |
+
+### I²C expansion devices
+
+The remaining peripherals cannot all be connected directly while retaining I²S, USB, UART debugging, and safe boot pins. Use an I²C expansion bus on GPIO0/GPIO1:
+
+| Device | Suggested interface | Example allocation |
+|---|---|---|
+| Four push buttons | MCP23017 GPIO expander | GPA0–GPA3; address 0x20 (A0–A2 low) |
+| LDR analog output | ADS1115 external ADC | AIN0; configure address 0x49 |
+| MQ sensor analog output | ADS1115 external ADC | AIN1; configure address 0x49 |
+| GPS UART | SC16IS752 I²C-to-dual-UART bridge | One UART channel; select an address that does not conflict with the other bus devices |
+
+The example addresses must be checked against the exact breakout-board address straps before assembly. Keep all I²C pull-ups at 3.3 V. The ADS1115 input must remain within its supply/input limits; add a divider or suitable analog conditioning for an MQ module whose analog output can exceed 3.3 V. MQ sensors also require their specified heater supply and warm-up time.
+
+### Reserved pins and electrical restrictions
+
+- GPIO2, GPIO8, and GPIO9 are ESP32-C3 strapping pins. Keep GPIO8 and GPIO9 unconnected to external loads in this design.
+- GPIO2 is used only for ultrasonic ECHO with a boot-safe buffer that guarantees the required reset-time strap level and prevents the sensor from driving the pin during reset. If that circuit is not implemented and verified, leave GPIO2 unused and use a different ultrasonic interface.
+- GPIO18/GPIO19 are the native USB D-/D+ signals. Do not attach external peripherals to them.
+- GPIO11–GPIO17 are associated with flash connectivity on the chip/module; do not allocate them to external peripherals.
+- GPIO4–GPIO7 also have JTAG multiplexed functions. This map uses them as GPIO/I²S; external JTAG debugging is therefore not part of this configuration.
+- GPIO20/GPIO21 are reserved for UART0 debugging. GPS must use the I²C-to-UART bridge in this allocation; do not connect GPS directly to the debug UART.
+- All ESP32-C3 GPIOs are 3.3 V logic. Never apply 5 V to a GPIO. For a typical 5 V HC-SR04 module, level-shift ECHO before it reaches GPIO2.
+- Power the INMP441 from 3.3 V and connect grounds. Do not add RC filters to the digital I²S signal lines. Place local supply decoupling close to the microphone module.
+
+### Expansion header recommendation
+
+Expose 3V3, GND, GPIO0 (SDA), GPIO1 (SCL), and a clearly labelled I²C connector/header for add-on boards. Keep the microphone and direct timing-sensitive sensor connections short. Document the I²C address straps and analog input conditioning in the wiring diagram/BOM.
+
+### Debug configuration
+
+- USB: native USB Serial/JTAG for flashing and USB serial monitoring, subject to the exact board's USB routing and boot mode.
+- UART: UART0 on GPIO20 (RX) and GPIO21 (TX), 3.3 V TTL only. Use a 3.3 V USB-UART adapter; do not connect RS-232 voltage levels.
+- USB and UART debugging can remain available together because GPS is moved to the I²C UART bridge.
+
+### Validation required before marking this map final for hardware
+
+1. Record the exact board revision and confirm the GPIO labels against its schematic.
+2. Verify native USB flashing/monitoring and UART0 logging independently.
+3. Confirm I²S capture on GPIO4/GPIO5/GPIO3 and validate channel selection and sample alignment.
+4. Test boot/reset repeatedly with the ultrasonic buffer attached to GPIO2; verify the strap level at reset.
+5. Scan the I²C bus and confirm the MCP23017, ADS1115, and SC16IS752 addresses do not collide.
+6. Validate analog scaling for both LDR and MQ outputs and confirm no ADC input exceeds its permitted range.
+7. Test all four buttons, GPS reception, DHT11, PIR, and ultrasonic timing together.
+8. Run sustained audio streaming with all expansion devices active and record noise, packet loss, latency, and current.
+
+Do not treat the table as physically verified until these checks pass on the actual board. If the selected SuperMini revision does not expose one of the listed GPIOs, revise the map against that board's schematic before wiring.
+
