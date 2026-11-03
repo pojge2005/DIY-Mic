@@ -98,6 +98,32 @@ Before building the full prototype:
 
 Do not mark the GPIO map as hardware-validated until these tests pass on the actual board.
 
+
+## Minimal First Build — Keep the Circuit Small
+
+The GPIO table above is the **long-term allocation plan**, not a requirement to populate every interface now. The first ESP32-C3 hardware revision must stay minimal:
+
+- ESP32-C3 Super Mini
+- INMP441 I²S microphone breakout
+- One 100 nF X7R capacitor at the microphone supply pins
+- One 100 kΩ SD pull-down only if not already fitted on the breakout
+- Short wiring and USB-C development power
+
+Do not add the OLED, buttons, GPS, PIR, IR, DHT11, MQ, LDR, ultrasonic sensor, MCP23017, ADS1115, battery charger, or extra regulator to the first microphone assembly. Reserve the GPIOs and add peripherals later as separate modules or a later expansion board.
+
+The target is a roughly 20 mm-class zero-PCB assembly if the physical module dimensions allow it. Do not force the layout: preserve USB access, antenna clearance, acoustic access to the microphone port, and safe solder spacing.
+
+### Power and noise filter decision
+
+- Use the Super Mini's regulated 3.3 V rail for the INMP441 after verifying the exact board.
+- Fit the manufacturer-recommended 100 nF X7R local bypass capacitor directly between mic VDD and GND.
+- An optional 4.7–10 µF capacitor across local 3.3 V/GND may be tested only if rail measurements or A/B PCM captures show improvement.
+- Do not add a ferrite bead, separate regulator, series resistor, or LC/RC filter by default.
+- Do not add capacitors to I²S BCLK, WS, or SD. These are digital signals, not analog microphone outputs.
+- Diagnose hiss through silence/speech PCM captures, channel/bit alignment checks, clean USB supply comparison, short wiring, and grounding before changing the circuit.
+
+See [Minimal Circuit, BOM and Noise-Reduction Plan](ESP32-C3-MINI-CIRCUIT.md) and [minimal wiring diagram](../hardware/diagrams/esp32-c3-minimal-mic.svg). This minimal circuit definition takes priority over the future peripheral expansion list for the first physical build.
+
 ## Migration Stages
 
 | Stage | Work | Exit condition |
