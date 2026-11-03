@@ -40,7 +40,7 @@ The host-side Python unit tests have been run successfully. The ESP8266 serial b
 
 ## Next Hardware Revision — Minimal ESP32-C3 Build
 
-The next hardware build is planned as a small, minimal circuit: ESP32-C3 Super Mini + INMP441 breakout + one local 100 nF X7R decoupling capacitor. A 100 kΩ SD pull-down is fitted only if it is not already present on the microphone breakout.
+The next hardware build is planned as a small, minimal circuit: ESP32-C3 Super Mini + INMP441 breakout + local 100 nF X7R decoupling (add only if the breakout does not already include it). A 100 kΩ SD pull-down is fitted only if it is not already present on the microphone breakout.
 
 No display, buttons, sensors, external ADC, GPIO expander, battery charger, or extra regulator is included in this first revision. USB-C is the development power source. The target is roughly 20 mm class, subject to actual board/module dimensions and safe USB/antenna/acoustic clearances.
 
