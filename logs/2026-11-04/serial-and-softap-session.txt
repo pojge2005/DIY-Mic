@@ -1,0 +1,490 @@
+user@host:~/Projects/DIY-Mic/firmware$ 
+user@host:~/Projects/DIY-Mic/firmware$ cd /home/user/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test
+
+cat > src/main.cpp <<'EOF'
+#include <Arduino.h>
+
+unsigned long lastReport = 0;
+
+void setup()
+{
+    Serial.begin(115200);
+
+    unsigned long start = millis();
+
+    while (!Serial && millis() - start < 5000)
+    {
+        delay(10);
+    }
+
+    Serial.println();
+    Serial.println("================================");
+    Serial.println("DIY-Mic ESP32-C3 SERIAL TEST");
+    Serial.println("================================");
+
+    Serial.printf("Chip: %s\n", ESP.getChipModel());
+    Serial.printf("Revision: %d\n", ESP.getChipRevision());
+    Serial.printf("CPU: %u MHz\n", ESP.getCpuFreqMHz());
+    Serial.printf("Flash: %u bytes\n", ESP.getFlashChipSize());
+
+    Serial.println("Serial initialization successful.");
+}
+
+void loop()
+{
+    if (millis() - lastReport >= 1000)
+    {
+        lastReport = millis();
+
+        Serial.printf(
+            "HEARTBEAT | Uptime: %lu s | Free heap: %u bytes\n", 
+            millis() / 1000,
+            ESP.getFreeHeap()
+        );
+    }
+
+    delay(10);
+}
+EOF
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ cat src/main.cpp
+#include <Arduino.h>
+
+unsigned long lastReport = 0;
+
+void setup()
+{
+    Serial.begin(115200);
+
+    unsigned long start = millis();
+
+    while (!Serial && millis() - start < 5000)
+    {
+        delay(10);
+    }
+
+    Serial.println();
+    Serial.println("================================");
+    Serial.println("DIY-Mic ESP32-C3 SERIAL TEST");
+    Serial.println("================================");
+
+    Serial.printf("Chip: %s\n", ESP.getChipModel());
+    Serial.printf("Revision: %d\n", ESP.getChipRevision());
+    Serial.printf("CPU: %u MHz\n", ESP.getCpuFreqMHz());
+    Serial.printf("Flash: %u bytes\n", ESP.getFlashChipSize());
+
+    Serial.println("Serial initialization successful.");
+}
+
+void loop()
+{
+    if (millis() - lastReport >= 1000)
+    {
+        lastReport = millis();
+
+        Serial.printf(
+            "HEARTBEAT | Uptime: %lu s | Free heap: %u bytes\n",
+            millis() / 1000,
+            ESP.getFreeHeap()
+        );
+    }
+
+    delay(10);
+}
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ pio run
+Processing esp32-c3-supermini (platform: espressif32@6.10.0; board: esp32-c3-devkitm-1; framework: arduino)
+----------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32-c3-devkitm-1.html
+PLATFORM: Espressif 32 (6.10.0) > Espressif ESP32-C3-DevKitM-1
+HARDWARE: ESP32C3 160MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-builtin, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 1.40501.0 (4.5.1) 
+ - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 33 compatible libraries
+Scanning dependencies...
+No dependencies
+Building in release mode
+Compiling .pio/build/esp32-c3-supermini/src/main.cpp.o
+Linking .pio/build/esp32-c3-supermini/firmware.elf
+Retrieving maximum program size .pio/build/esp32-c3-supermini/firmware.elf
+Checking size .pio/build/esp32-c3-supermini/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   4.2% (used 13892 bytes from 327680 bytes)
+Flash: [==        ]  18.8% (used 245818 bytes from 1310720 bytes)
+Building .pio/build/esp32-c3-supermini/firmware.bin with action:
+  "$PYTHONEXE" "$OBJCOPY" --chip esp32c3 elf2image --flash_mode${__get_board_flash_mode(__env__)} --flash_freq ${__get_board_f_image(__env__)} --flash_size 4MB --elf-sha256-offset 0xb0 -o $TARGET $SOURCES
+Building .pio/build/esp32-c3-supermini/firmware.bin
+esptool.py v4.5.1
+Creating esp32c3 image...
+Merged 2 ELF sections
+Successfully created esp32c3 image.
+================= [SUCCESS] Took 2.66 seconds =================
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ pio run -t upload \
+  --upload-port /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00
+Processing esp32-c3-supermini (platform: espressif32@6.10.0; board: esp32-c3-devkitm-1; framework: arduino)
+----------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32-c3-devkitm-1.html
+PLATFORM: Espressif 32 (6.10.0) > Espressif ESP32-C3-DevKitM-1
+HARDWARE: ESP32C3 160MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-builtin, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 1.40501.0 (4.5.1) 
+ - tool-mkfatfs @ 2.0.1 
+ - tool-mklittlefs @ 1.203.210628 (2.3) 
+ - tool-mkspiffs @ 2.230.0 (2.30) 
+ - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 33 compatible libraries
+Scanning dependencies...
+No dependencies
+Building in release mode
+Retrieving maximum program size .pio/build/esp32-c3-supermini/firmware.elf
+Checking size .pio/build/esp32-c3-supermini/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   4.2% (used 13892 bytes from 327680 bytes)
+Flash: [==        ]  18.8% (used 245818 bytes from 1310720 bytes)
+Configuring upload protocol...
+AVAILABLE: cmsis-dap, esp-bridge, esp-builtin, esp-prog, espota, esptool, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa
+CURRENT: upload_protocol = esptool
+Looking for upload port...
+Using manually specified: /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00
+Uploading .pio/build/esp32-c3-supermini/firmware.bin
+esptool.py v4.5.1
+Serial port /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00
+Connecting...
+Chip is ESP32-C3 (revision v0.4)
+Features: WiFi, BLE
+Crystal is 40MHz
+MAC: [REDACTED_DEVICE_MAC]
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00000000 to 0x00003fff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+Flash will be erased from 0x0000e000 to 0x0000ffff...
+Flash will be erased from 0x00010000 to 0x0004efff...
+Compressed 13248 bytes to 9562...
+Writing at 0x00000000... (100 %)
+Wrote 13248 bytes (9562 compressed) at 0x00000000 in 0.1 seconds (effective 994.5 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 146...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (146 compressed) at 0x00008000 in 0.0 seconds (effective 1187.0 kbit/s)...
+Hash of data verified.
+Compressed 8192 bytes to 47...
+Writing at 0x0000e000... (100 %)
+Wrote 8192 bytes (47 compressed) at 0x0000e000 in 0.0 seconds (effective 1508.2 kbit/s)...
+Hash of data verified.
+Compressed 257408 bytes to 143358...
+Writing at 0x00010000... (11 %)
+Writing at 0x0001b184... (22 %)
+Writing at 0x000232aa... (33 %)
+Writing at 0x000293d4... (44 %)
+Writing at 0x0002f544... (55 %)
+Writing at 0x0003571c... (66 %)
+Writing at 0x0003c64c... (77 %)
+Writing at 0x00044038... (88 %)
+Writing at 0x0004a016... (100 %)
+Wrote 257408 bytes (143358 compressed) at 0x00010000 in 1.0 seconds (effective 2065.4 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...
+================= [SUCCESS] Took 3.51 seconds =================
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ pio device monitor \
+  --port /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00 \
+  --baud 115200
+--- Terminal on /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00 | 115200 8-N-1
+--- Available filters and text transformations: debug, default,direct, esp32_exception_decoder, hexlify, log2file, nocontrol, printable, send_on_enter, time
+--- More details at https://bit.ly/pio-monitor-filters
+--- Quit: Ctrl+C | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H
+HEARTBEAT | Uptime: 11 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 12 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 13 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 14 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 15 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 16 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 17 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 18 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 19 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 20 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 21 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 22 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 23 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 24 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 25 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 26 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 27 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 28 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 29 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 30 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 31 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 32 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 33 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 34 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 35 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 36 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 37 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 38 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 39 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 40 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 41 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 42 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 43 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 44 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 45 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 46 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 47 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 48 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 49 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 50 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 51 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 52 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 53 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 54 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 55 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 56 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 57 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 58 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 59 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 60 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 61 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 62 s | Free heap: 310948 bytes
+HEARTBEAT | Uptime: 63 s | Free heap: 310948 bytes
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ cp src/main.cpp.wifi-diagnostic src/main.cpp
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ grep -nE 'WiFi|softAP|softAPConfig|HEARTBEAT|Serial' src/main.cpp
+2:#include <WiFi.h>
+21:        "DIY-Mic ESP32-C3 WiFi AP is working."
+29:    response += "\"ip\":\"" + WiFi.softAPIP().toString() + "\",";
+31:    response += String(WiFi.softAPgetStationNum());
+39:    Serial.println("\n[1] Setting WiFi mode...");
+41:    if (!WiFi.mode(WIFI_AP))
+43:        Serial.println("ERROR: WIFI_AP mode failed.");
+47:    Serial.println("WIFI_AP mode initialized.");
+49:    Serial.println("[2] Configuring AP address...");
+51:    if (!WiFi.softAPConfig(localIP, gateway, subnet))
+53:        Serial.println("ERROR: SoftAP IP configuration failed.");
+57:    Serial.println("AP address configured.");
+59:    Serial.println("[3] Starting access point...");
+61:    apStarted = WiFi.softAP(
+71:        Serial.println("ERROR: SoftAP startup failed.");
+75:    Serial.println("SUCCESS: Access point started.");
+76:    Serial.printf("SSID: %s\n", AP_SSID);
+77:    Serial.print("IP: ");
+78:    Serial.println(WiFi.softAPIP());
+84:    Serial.println("HTTP server started.");
+89:    Serial.begin(115200);
+93:    while (!Serial && millis() - start < 10000)
+100:    Serial.println("\n================================");
+101:    Serial.println("DIY-Mic WiFi Diagnostic");
+102:    Serial.println("ESP32-C3");
+103:    Serial.println("================================");
+105:    Serial.printf("Chip: %s\n", ESP.getChipModel());
+106:    Serial.printf("CPU: %u MHz\n", ESP.getCpuFreqMHz());
+107:    Serial.printf("Free heap: %u bytes\n", ESP.getFreeHeap());
+125:        Serial.printf(
+126:            "[STATUS] Uptime: %lu s | WiFi mode: %d | AP clients: %u | Heap: %u\n",
+128:            WiFi.getMode(),
+129:            WiFi.softAPgetStationNum(),
+135:            Serial.print("AP IP: ");
+136:            Serial.println(WiFi.softAPIP());
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ pio run
+Processing esp32-c3-supermini (platform: espressif32@6.10.0; board: esp32-c3-devkitm-1; framework: arduino)
+----------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32-c3-devkitm-1.html
+PLATFORM: Espressif 32 (6.10.0) > Espressif ESP32-C3-DevKitM-1
+HARDWARE: ESP32C3 160MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-builtin, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 1.40501.0 (4.5.1) 
+ - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 33 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- WebServer @ 2.0.0
+|-- WiFi @ 2.0.0
+Building in release mode
+Compiling .pio/build/esp32-c3-supermini/src/main.cpp.o
+Linking .pio/build/esp32-c3-supermini/firmware.elf
+Retrieving maximum program size .pio/build/esp32-c3-supermini/firmware.elf
+Checking size .pio/build/esp32-c3-supermini/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [=         ]  12.0% (used 39212 bytes from 327680 bytes)
+Flash: [======    ]  57.6% (used 755000 bytes from 1310720 bytes)
+Building .pio/build/esp32-c3-supermini/firmware.bin with action:
+  "$PYTHONEXE" "$OBJCOPY" --chip esp32c3 elf2image --flash_mode${__get_board_flash_mode(__env__)} --flash_freq ${__get_board_f_image(__env__)} --flash_size 4MB --elf-sha256-offset 0xb0 -o $TARGET $SOURCES
+Building .pio/build/esp32-c3-supermini/firmware.bin
+esptool.py v4.5.1
+Creating esp32c3 image...
+Merged 2 ELF sections
+Successfully created esp32c3 image.
+================= [SUCCESS] Took 3.93 seconds =================
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ pio run --target upload \
+  --upload-port /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00
+Processing esp32-c3-supermini (platform: espressif32@6.10.0; board: esp32-c3-devkitm-1; framework: arduino)
+----------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32-c3-devkitm-1.html
+PLATFORM: Espressif 32 (6.10.0) > Espressif ESP32-C3-DevKitM-1
+HARDWARE: ESP32C3 160MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-builtin, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 1.40501.0 (4.5.1) 
+ - tool-mkfatfs @ 2.0.1 
+ - tool-mklittlefs @ 1.203.210628 (2.3) 
+ - tool-mkspiffs @ 2.230.0 (2.30) 
+ - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 33 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- WebServer @ 2.0.0
+|-- WiFi @ 2.0.0
+Building in release mode
+Retrieving maximum program size .pio/build/esp32-c3-supermini/firmware.elf
+Checking size .pio/build/esp32-c3-supermini/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [=         ]  12.0% (used 39212 bytes from 327680 bytes)
+Flash: [======    ]  57.6% (used 755000 bytes from 1310720 bytes)
+Configuring upload protocol...
+AVAILABLE: cmsis-dap, esp-bridge, esp-builtin, esp-prog, espota, esptool, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa
+CURRENT: upload_protocol = esptool
+Looking for upload port...
+Using manually specified: /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00
+Uploading .pio/build/esp32-c3-supermini/firmware.bin
+esptool.py v4.5.1
+Serial port /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00
+Connecting...
+Chip is ESP32-C3 (revision v0.4)
+Features: WiFi, BLE
+Crystal is 40MHz
+MAC: [REDACTED_DEVICE_MAC]
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00000000 to 0x00003fff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+Flash will be erased from 0x0000e000 to 0x0000ffff...
+Flash will be erased from 0x00010000 to 0x000cdfff...
+Compressed 13248 bytes to 9562...
+Writing at 0x00000000... (100 %)
+Wrote 13248 bytes (9562 compressed) at 0x00000000 in 0.1 seconds (effective 979.6 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 146...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (146 compressed) at 0x00008000 in 0.0 seconds (effective 1325.0 kbit/s)...
+Hash of data verified.
+Compressed 8192 bytes to 47...
+Writing at 0x0000e000... (100 %)
+Wrote 8192 bytes (47 compressed) at 0x0000e000 in 0.0 seconds (effective 1487.7 kbit/s)...
+Hash of data verified.
+Compressed 778192 bytes to 467751...
+Writing at 0x00010000... (3 %)
+Writing at 0x0001c464... (6 %)
+Writing at 0x0002612b... (10 %)
+Writing at 0x000309b4... (13 %)
+Writing at 0x00036ed1... (17 %)
+Writing at 0x0003dd20... (20 %)
+Writing at 0x00043d05... (24 %)
+Writing at 0x00049dbf... (27 %)
+Writing at 0x0004fad6... (31 %)
+Writing at 0x0005581c... (34 %)
+Writing at 0x0005bb8b... (37 %)
+Writing at 0x00061854... (41 %)
+Writing at 0x0006763f... (44 %)
+Writing at 0x0006dbae... (48 %)
+Writing at 0x00073342... (51 %)
+Writing at 0x000794a3... (55 %)
+Writing at 0x0007f53a... (58 %)
+Writing at 0x00085087... (62 %)
+Writing at 0x0008b06d... (65 %)
+Writing at 0x00091172... (68 %)
+Writing at 0x00097598... (72 %)
+Writing at 0x0009dad1... (75 %)
+Writing at 0x000a3f2e... (79 %)
+Writing at 0x000a9d3a... (82 %)
+Writing at 0x000afc25... (86 %)
+Writing at 0x000b77ea... (89 %)
+Writing at 0x000be444... (93 %)
+Writing at 0x000c4388... (96 %)
+Writing at 0x000ca607... (100 %)
+Wrote 778192 bytes (467751 compressed) at 0x00010000 in 2.6 seconds (effective 2377.1 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...
+================= [SUCCESS] Took 6.02 seconds =================
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ pio device monitor \
+  --port /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00 \
+  --baud 115200
+--- Terminal on /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00 | 115200 8-N-1
+--- Available filters and text transformations: debug, default,direct, esp32_exception_decoder, hexlify, log2file, nocontrol, printable, send_on_enter, time
+--- More details at https://bit.ly/pio-monitor-filters
+--- Quit: Ctrl+C | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H
+[STATUS] Uptime: 36 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 39 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 42 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 45 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 48 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 51 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 54 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 57 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 60 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 63 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 66 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 69 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 72 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 75 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 78 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 81 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 84 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 87 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 90 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 93 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 96 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 99 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 102 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4.1
+[STATUS] Uptime: 105 s | WiFi mode: 2 | AP clients: 0 | Heap: 229092
+AP IP: 192.168.4user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ 

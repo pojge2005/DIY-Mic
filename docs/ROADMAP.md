@@ -14,9 +14,9 @@ This roadmap describes the intended development of DIY-Mic. Status is updated as
 | V0.8 | Ubuntu Wi-Fi receiver and PipeWire virtual microphone | Linux receiver | Planned |
 | V0.9 | Range, current and battery measurements | ESP8266 | Planned |
 | V1.0 | Documented ESP8266 reference prototype | ESP8266 | Planned |
-| V1.1 | I²S and power bring-up | ESP32-C3 Super Mini | Future |
-| V1.2 | Zero-PCB/perfboard microphone assembly | ESP32-C3 Super Mini + INMP441 | Future |
-| V1.3 | Wi-Fi audio port and Android/PC validation | ESP32-C3 | Future |
+| V1.1 | Board and serial bring-up | ESP32-S3 (exact board pending) | Next |
+| V1.2 | INMP441 I²S validation | ESP32-S3 + INMP441 | Planned |
+| V1.3 | Wi-Fi SoftAP and receiver validation | ESP32-S3 | Planned |
 | V1.4 | Windows receiver feasibility | Windows software | Future |
 | V1.5 | USB receiver dongle proof of concept | ESP32-S3 or suitable USB-capable hardware | Future |
 | V1.6 | BLE and dedicated low-power audio evaluation | Wireless comparison | Future |
@@ -57,23 +57,19 @@ This roadmap describes the intended development of DIY-Mic. Status is updated as
 - Consolidate verified firmware and receiver source.
 - Document reproducible wiring and setup.
 
-## V1.1–V1.3 — ESP32-C3 Super Mini
+## ESP32-C3 Investigation — Closed 2026-11-04
 
-- Keep the first circuit minimal: Super Mini + INMP441 + local 100 nF decoupling (use the breakout's existing capacitor if present).
-- Follow the [minimal circuit and component list](ESP32-C3-MINI-CIRCUIT.md).
-- Target a roughly 20 mm-class zero-PCB assembly only after checking actual module dimensions.
-- Keep all additional sensors and expansion ICs off the first revision.
-- Use USB-C power for bring-up; add power filtering only when measurements justify it.
+The C3 bring-up is archived after the SoftAP acceptance test failed to make the configured SSID visible in repeated Ubuntu scans. Serial-only diagnostics worked, and the INMP441 I²S test produced data, but no client association, HTTP verification, or audio streaming was completed. The root cause remains unknown.
 
+Preserve the diagnostic projects and raw logs. Do not treat the C3 silicon as conclusively defective. See [the session report](ESP32-C3-SESSION-2026-11-04.md).
 
+## V1.1–V1.3 — ESP32-S3 Bring-up
 
-- Identify exact board revision and pinout.
-- Verify power and INMP441 wiring.
-- Bring up I²S capture and PCM format.
-- Assemble on zero PCB/perfboard.
-- Port Wi-Fi AP and WebSocket streaming.
-- Repeat Android playback, PC playback, and reliability tests.
-- Keep the ESP8266 reference available until the ESP32-C3 passes the same tests.
+- Identify the exact ESP32-S3 board/module and its flash, PSRAM, USB, and GPIO configuration.
+- Create and validate a serial-only PlatformIO baseline.
+- Verify SoftAP SSID discovery from Ubuntu and Android before adding other services.
+- Validate INMP441 I²S capture using the board's verified GPIO mapping.
+- Add HTTP/WebSocket only after the network baseline passes.
 
 ## V1.4 — Windows Receiver Feasibility
 
