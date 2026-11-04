@@ -51,3 +51,12 @@ The delay rating is subjective and the 2 m result is the tested distance, not th
 6. Record the results before changing firmware.
 
 A separate speech test at approximately 20 cm should be recorded for comparison.
+
+
+## ESP32-C3 Bring-up — 2026-11-04
+
+- Serial-only firmware compiled/uploaded and produced stable heartbeat output during the captured observation window.
+- INMP441 I²S diagnostic produced changing raw words; reported rate was approximately 16,000–16,016 Hz. Sample alignment and controlled acoustic quality measurements remain incomplete.
+- Wi-Fi SoftAP firmware compiled/uploaded. Runtime reported AP mode and 192.168.4.1, but repeated Ubuntu scans did not detect the configured SSID and no client connected.
+- C3 workstream closed for this iteration; root cause not isolated. ESP32-S3 family selected as the next target, exact board pending identification.
+- Full test details and raw console records: [ESP32-C3 session report](ESP32-C3-SESSION-2026-11-04.md), ../../logs/2026-11-04/.

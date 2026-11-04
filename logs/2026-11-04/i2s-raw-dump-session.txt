@@ -1,0 +1,689 @@
+user@host:~/DIY-Mic/DIY-Mic V0.7.0$ cd /home/user/Projects/DIY-Mic
+
+mkdir -p firmware/esp32-c3/diagnostics
+
+cp -a firmware/esp32-c3/v0.7.0 \
+  firmware/esp32-c3/diagnostics/i2s-raw-dump
+user@host:~/Projects/DIY-Mic$ cat firmware/esp32-c3/diagnostics/i2s-raw-dump/src/main.cpp
+#include <Arduino.h>
+#include <driver/i2s.h>
+#include <math.h>
+#include <stdint.h>
+
+#define I2S_PORT I2S_NUM_0
+
+#define PIN_I2S_BCLK 4
+#define PIN_I2S_WS 5
+#define PIN_I2S_SD 3
+
+#define SAMPLE_RATE 16000
+#define BUFFER_SAMPLES 256
+
+#define CLIP_THRESHOLD 32760
+
+int32_t rawSamples[BUFFER_SAMPLES];
+
+int32_t minimumSample = INT32_MAX;
+int32_t maximumSample = INT32_MIN;
+
+uint32_t peakLevel = 0;
+uint32_t clippedSamples = 0;
+uint32_t sampleCount = 0;
+
+uint64_t totalSquares = 0;
+
+unsigned long lastReportMs = 0;
+unsigned long measurementStartMs = 0;
+
+bool startMicrophone()
+{
+    i2s_config_t config = {};
+
+    config.mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX);
+    config.sample_rate = SAMPLE_RATE;
+    config.bits_per_sample = I2S_BITS_PER_SAMPLE_32BIT;
+    config.channel_format = I2S_CHANNEL_FMT_ONLY_LEFT;
+    config.communication_format = I2S_COMM_FORMAT_I2S;
+    config.intr_alloc_flags = ESP_INTR_FLAG_LEVEL1;
+    config.dma_buf_count = 4;
+    config.dma_buf_len = BUFFER_SAMPLES;
+    config.use_apll = false;
+    config.fixed_mclk = 0;
+
+    esp_err_t result = i2s_driver_install(
+        I2S_PORT, &config, 0, nullptr
+    );
+
+    if (result != ESP_OK)
+    {
+        Serial.printf("I2S driver error: %d\n", result);
+        return false;
+    }
+
+    i2s_pin_config_t pins = {};
+
+    pins.bck_io_num = PIN_I2S_BCLK;
+    pins.ws_io_num = PIN_I2S_WS;
+    pins.data_out_num = I2S_PIN_NO_CHANGE;
+    pins.data_in_num = PIN_I2S_SD;
+
+    result = i2s_set_pin(I2S_PORT, &pins);
+
+    if (result != ESP_OK)
+    {
+        Serial.printf("I2S pin error: %d\n", result);
+        i2s_driver_uninstall(I2S_PORT);
+        return false;
+    }
+
+    i2s_zero_dma_buffer(I2S_PORT);
+
+    return true;
+}
+
+void resetMeasurements()
+{
+    minimumSample = INT32_MAX;
+    maximumSample = INT32_MIN;
+    peakLevel = 0;
+    clippedSamples = 0;
+    sampleCount = 0;
+    totalSquares = 0;
+}
+
+void setup()
+{
+    Serial.begin(115200);
+    delay(1000);
+
+    Serial.println("\nDIY-Mic V0.7.1");
+    Serial.println("INMP441 I2S Diagnostic");
+
+    if (!startMicrophone())
+    {
+        Serial.println("Microphone initialization failed.");
+        return;
+    }
+
+    Serial.println("I2S initialized.");
+    lastReportMs = millis();
+    measurementStartMs = millis();
+}
+
+void loop()
+{
+    size_t bytesRead = 0;
+
+    esp_err_t result = i2s_read(
+        I2S_PORT,
+        rawSamples,
+        sizeof(rawSamples),
+        &bytesRead,
+        portMAX_DELAY
+    );
+
+    if (result != ESP_OK || bytesRead == 0)
+    {
+        Serial.printf("I2S read error: %d\n", result);
+        return;
+    }
+
+    size_t count = bytesRead / sizeof(int32_t);
+
+    static bool rawWordsPrinted = false;
+
+    if (!rawWordsPrinted)
+    {
+        Serial.println("First raw I2S words:");
+
+        for (size_t i = 0; i < 8 && i < count; i++)
+        {
+            Serial.printf(
+                "RAW: 0x%08lX\n",
+                (unsigned long)rawSamples[i]
+            );
+        }
+
+        rawWordsPrinted = true;
+    }
+
+    for (size_t i = 0; i < count; i++)
+    {
+        int32_t sample24 = rawSamples[i] >> 8;
+        int16_t sample16 = (int16_t)(sample24 >> 8);
+
+        int32_t absoluteLevel = abs((int32_t)sample16);
+
+        if (sample16 < minimumSample)
+            minimumSample = sample16;
+
+        if (sample16 > maximumSample)
+            maximumSample = sample16;
+
+        if ((uint32_t)absoluteLevel > peakLevel)
+            peakLevel = absoluteLevel;
+
+        if (sample16 >= CLIP_THRESHOLD ||
+            sample16 <= -CLIP_THRESHOLD)
+        {
+            clippedSamples++;
+        }
+
+        totalSquares += (int64_t)sample16 * sample16;
+        sampleCount++;
+    }
+
+    unsigned long now = millis();
+
+    if (now - lastReportMs >= 1000)
+    {
+        float elapsed =
+            (now - measurementStartMs) / 1000.0f;
+
+        float measuredRate = sampleCount / elapsed;
+
+        float rms = sampleCount > 0
+            ? sqrt((double)totalSquares / sampleCount)
+            : 0;
+
+        Serial.printf(
+            "Rate: %.0f Hz | Min: %ld | Max: %ld | "
+            "Peak: %lu | RMS: %.1f | Clipped: %lu\n",
+            measuredRate,
+            (long)minimumSample,
+            (long)maximumSample,
+            (unsigned long)peakLevel,
+            rms,
+            (unsigned long)clippedSamples
+        );
+
+        resetMeasurements();
+
+        measurementStartMs = now;
+        lastReportMs = now;
+    }
+}
+user@host:~/Projects/DIY-Mic$ 
+user@host:~/Projects/DIY-Mic$ cat > firmware/esp32-c3/diagnostics/i2s-raw-dump/src/main.cpp <<'EOF'
+#include <Arduino.h>
+#include <driver/i2s.h>
+#include <math.h>
+#include <stdint.h>
+#include <limits.h>
+
+#define I2S_PORT I2S_NUM_0
+
+#define PIN_I2S_BCLK 4
+#define PIN_I2S_WS 5
+#define PIN_I2S_SD 3
+
+#define SAMPLE_RATE 16000
+#define BUFFER_SAMPLES 256
+#define CLIP_THRESHOLD 32760
+
+#define RAW_DUMP_INTERVAL_MS 5000
+
+int32_t rawSamples[BUFFER_SAMPLES];
+
+int32_t minimumSample = INT32_MAX;
+int32_t maximumSample = INT32_MIN;
+
+uint32_t peakLevel = 0;
+uint32_t clippedSamples = 0;
+uint32_t sampleCount = 0;
+
+uint64_t totalSquares = 0;
+
+unsigned long lastReportMs = 0;
+unsigned long measurementStartMs = 0;
+unsigned long lastRawDumpMs = 0;
+
+bool startMicrophone()
+{
+    i2s_config_t config = {};
+
+    config.mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX);
+    config.sample_rate = SAMPLE_RATE;
+    config.bits_per_sample = I2S_BITS_PER_SAMPLE_32BIT;
+    config.channel_format = I2S_CHANNEL_FMT_ONLY_LEFT;
+    config.communication_format = I2S_COMM_FORMAT_I2S;
+    config.intr_alloc_flags = ESP_INTR_FLAG_LEVEL1;
+    config.dma_buf_count = 4;
+    config.dma_buf_len = BUFFER_SAMPLES;
+    config.use_apll = false;
+    config.fixed_mclk = 0;
+
+    esp_err_t result = i2s_driver_install(
+        I2S_PORT, &config, 0, nullptr
+    );
+
+    if (result != ESP_OK)
+    {
+        Serial.printf("I2S driver error: %d\n", result);
+        return false;
+    }
+
+    i2s_pin_config_t pins = {};
+
+    pins.bck_io_num = PIN_I2S_BCLK;
+    pins.ws_io_num = PIN_I2S_WS;
+    pins.data_out_num = I2S_PIN_NO_CHANGE;
+    pins.data_in_num = PIN_I2S_SD;
+
+    result = i2s_set_pin(I2S_PORT, &pins);
+
+    if (result != ESP_OK)
+    {
+        Serial.printf("I2S pin error: %d\n", result);
+        i2s_driver_uninstall(I2S_PORT);
+        return false;
+    }
+
+    i2s_zero_dma_buffer(I2S_PORT);
+
+    return true;
+}
+
+void resetMeasurements()
+{
+    minimumSample = INT32_MAX;
+    maximumSample = INT32_MIN;
+    peakLevel = 0;
+    clippedSamples = 0;
+    sampleCount = 0;
+    totalSquares = 0;
+}
+
+void printRawSamples()
+{
+    Serial.println("\n--- RAW I2S DATA ---");
+
+    for (size_t i = 0; i < 8; i++)
+    {
+        Serial.printf(
+            "RAW[%u]: 0x%08lX\n",
+            (unsigned int)i,
+            (unsigned long)rawSamples[i]
+        );
+    }
+
+    Serial.println("--------------------");
+}
+
+void setup()
+{
+    Serial.begin(115200);
+    delay(1000);
+
+    Serial.println("\nDIY-Mic I2S Raw Diagnostic");
+    Serial.println("INMP441 - 16 kHz - 32-bit I2S");
+
+    if (!startMicrophone())
+    {
+        Serial.println("Microphone initialization failed.");
+        return;
+    }
+
+    Serial.println("I2S initialized.");
+
+    unsigned long now = millis();
+
+    lastReportMs = now;
+    measurementStartMs = now;
+    lastRawDumpMs = now;
+}
+
+void loop()
+{
+    size_t bytesRead = 0;
+
+    esp_err_t result = i2s_read(
+        I2S_PORT,
+        rawSamples,
+        sizeof(rawSamples),
+        &bytesRead,
+        portMAX_DELAY
+    );
+
+    if (result != ESP_OK || bytesRead == 0)
+    {
+        Serial.printf("I2S read error: %d\n", result);
+        return;
+    }
+
+    size_t count = bytesRead / sizeof(int32_t);
+
+    for (size_t i = 0; i < count; i++)
+    {
+        int32_t sample24 = rawSamples[i] >> 8;
+        int16_t sample16 = (int16_t)(sample24 >> 8);
+
+        int32_t absoluteLevel = abs((int32_t)sample16);
+
+        if (sample16 < minimumSample)
+            minimumSample = sample16;
+
+        if (sample16 > maximumSample)
+            maximumSample = sample16;
+
+        if ((uint32_t)absoluteLevel > peakLevel)
+            peakLevel = absoluteLevel;
+
+        if (sample16 >= CLIP_THRESHOLD ||
+            sample16 <= -CLIP_THRESHOLD)
+        {
+            clippedSamples++;
+        }
+
+        totalSquares += (int64_t)sample16 * sample16;
+        sampleCount++;
+    }
+
+    unsigned long now = millis();
+
+    if (now - lastRawDumpMs >= RAW_DUMP_INTERVAL_MS)
+    {
+        printRawSamples();
+        lastRawDumpMs = now;
+    }
+
+    if (now - lastReportMs >= 1000)
+    {
+        float elapsed =
+            (now - measurementStartMs) / 1000.0f;
+
+        float measuredRate = sampleCount / elapsed;
+
+        float rms = sampleCount > 0
+            ? sqrt((double)totalSquares / sampleCount)
+            : 0;
+
+        Serial.printf(
+            "Rate: %.0f Hz | Min: %ld | Max: %ld | "
+            "Peak: %lu | RMS: %.1f | Clipped: %lu\n",
+            measuredRate,
+            (long)minimumSample,
+            (long)maximumSample,
+            (unsigned long)peakLevel,
+            rms,
+            (unsigned long)clippedSamples
+        );
+
+        resetMeasurements();
+
+        measurementStartMs = now;
+        lastReportMs = now;
+    }
+}
+EOF
+user@host:~/Projects/DIY-Mic$ cd /home/user/Projects/DIY-Mic/firmware/esp32-c3/diagnostics/i2s-raw-dump
+
+pio run
+Processing esp32-c3-supermini (platform: espressif32@6.10.0; board: esp32-c3-devkitm-1; framework: arduino)
+---------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32-c3-devkitm-1.html
+PLATFORM: Espressif 32 (6.10.0) > Espressif ESP32-C3-DevKitM-1
+HARDWARE: ESP32C3 160MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-builtin, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 1.40501.0 (4.5.1) 
+ - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 33 compatible libraries
+Scanning dependencies...
+No dependencies
+Building in release mode
+Compiling .pio/build/esp32-c3-supermini/src/main.cpp.o
+Building .pio/build/esp32-c3-supermini/bootloader.bin
+Generating partitions .pio/build/esp32-c3-supermini/partitions.bin
+esptool.py v4.5.1
+Creating esp32c3 image...
+Merged 1 ELF section
+Successfully created esp32c3 image.
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/Esp.cpp.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/FirmwareMSC.cpp.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/FunctionalInterrupt.cpp.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/HWCDC.cpp.o
+src/main.cpp: In function 'bool startMicrophone()':
+src/main.cpp:42:35: warning: 'I2S_COMM_FORMAT_I2S' is deprecated [-Wdeprecated-declarations]
+     config.communication_format = I2S_COMM_FORMAT_I2S;
+                                   ^~~~~~~~~~~~~~~~~~~
+In file included from /home/user/.platformio/packages/framework-arduinoespressif32@3.20017.241212+sha.dcc1105b/tools/sdk/esp32c3/include/driver/include/driver/i2s.h:16,
+                 from src/main.cpp:2:
+/home/user/.platformio/packages/framework-arduinoespressif32@3.20017.241212+sha.dcc1105b/tools/sdk/esp32c3/include/hal/include/hal/i2s_types.h:87:5: note: declared here
+     I2S_COMM_FORMAT_I2S       __attribute__((deprecated)) = 0x01, /*!< I2S communication format I2S, correspond to `I2S_COMM_FORMAT_STAND_I2S`*/
+     ^~~~~~~~~~~~~~~~~~~
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/HardwareSerial.cpp.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/IPAddress.cpp.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/IPv6Address.cpp.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/MD5Builder.cpp.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/Print.cpp.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/Stream.cpp.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/StreamString.cpp.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/Tone.cpp.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/USB.cpp.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/USBCDC.cpp.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/USBMSC.cpp.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/WMath.cpp.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/WString.cpp.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/base64.cpp.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/cbuf.cpp.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-adc.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-bt.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-cpu.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-dac.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-gpio.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-i2c-slave.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-i2c.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-ledc.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-matrix.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-misc.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-psram.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-rgb-led.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-rmt.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-sigmadelta.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-spi.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-time.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-timer.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-tinyusb.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-touch.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/esp32-hal-uart.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/firmware_msc_fat.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/libb64/cdecode.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/libb64/cencode.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/main.cpp.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/stdlib_noniso.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/wiring_pulse.c.o
+Compiling .pio/build/esp32-c3-supermini/FrameworkArduino/wiring_shift.c.o
+Archiving .pio/build/esp32-c3-supermini/libFrameworkArduino.a
+Indexing .pio/build/esp32-c3-supermini/libFrameworkArduino.a
+Linking .pio/build/esp32-c3-supermini/firmware.elf
+Retrieving maximum program size .pio/build/esp32-c3-supermini/firmware.elf
+Checking size .pio/build/esp32-c3-supermini/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   4.6% (used 14956 bytes from 327680 bytes)
+Flash: [==        ]  20.0% (used 261680 bytes from 1310720 bytes)
+Building .pio/build/esp32-c3-supermini/firmware.bin with action:
+  "$PYTHONEXE" "$OBJCOPY" --chip esp32c3 elf2image --flash_mode ${__get_board_flash_mode(__env__)} --flash_freq ${__get_board_f_image(__env__)} --flash_size 4MB --elf-sha256-offset 0xb0 -o$TARGET $SOURCES
+Building .pio/build/esp32-c3-supermini/firmware.bin
+esptool.py v4.5.1
+Creating esp32c3 image...
+Merged 2 ELF sections
+Successfully created esp32c3 image.
+================= [SUCCESS] Took 6.54 seconds =================
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/diagnostics/i2s-raw-dump$ pio run -t upload --upload-port /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00
+Processing esp32-c3-supermini (platform: espressif32@6.10.0; board: esp32-c3-devkitm-1; framework: arduino)
+---------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32-c3-devkitm-1.html
+PLATFORM: Espressif 32 (6.10.0) > Espressif ESP32-C3-DevKitM-1
+HARDWARE: ESP32C3 160MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-builtin, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 1.40501.0 (4.5.1) 
+ - tool-mkfatfs @ 2.0.1 
+ - tool-mklittlefs @ 1.203.210628 (2.3) 
+ - tool-mkspiffs @ 2.230.0 (2.30) 
+ - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 33 compatible libraries
+Scanning dependencies...
+No dependencies
+Building in release mode
+Retrieving maximum program size .pio/build/esp32-c3-supermini/firmware.elf
+Checking size .pio/build/esp32-c3-supermini/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [          ]   4.6% (used 14956 bytes from 327680 bytes)
+Flash: [==        ]  20.0% (used 261680 bytes from 1310720 bytes)
+Configuring upload protocol...
+AVAILABLE: cmsis-dap, esp-bridge, esp-builtin, esp-prog, espota, esptool, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa
+CURRENT: upload_protocol = esptool
+Looking for upload port...
+Using manually specified: /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00
+Uploading .pio/build/esp32-c3-supermini/firmware.bin
+esptool.py v4.5.1
+Serial port /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00
+Connecting...
+Chip is ESP32-C3 (revision v0.4)
+Features: WiFi, BLE
+Crystal is 40MHz
+MAC: [REDACTED_DEVICE_MAC]
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00000000 to 0x00003fff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+Flash will be erased from 0x0000e000 to 0x0000ffff...
+Flash will be erased from 0x00010000 to 0x00052fff...
+Compressed 13248 bytes to 9562...
+Writing at 0x00000000... (100 %)
+Wrote 13248 bytes (9562 compressed) at 0x00000000 in 0.1 seconds (effective 965.8 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 146...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (146 compressed) at 0x00008000 in 0.0 seconds(effective 1144.8 kbit/s)...
+Hash of data verified.
+Compressed 8192 bytes to 47...
+Writing at 0x0000e000... (100 %)
+Wrote 8192 bytes (47 compressed) at 0x0000e000 in 0.0 seconds (effective 1534.8 kbit/s)...
+Hash of data verified.
+Compressed 273280 bytes to 151379...
+Writing at 0x00010000... (10 %)
+Writing at 0x0001b856... (20 %)
+Writing at 0x00023cc4... (30 %)
+Writing at 0x0002a7bc... (40 %)
+Writing at 0x000307bc... (50 %)
+Writing at 0x000368a5... (60 %)
+Writing at 0x0003c4ea... (70 %)
+Writing at 0x0004492c... (80 %)
+Writing at 0x0004ac26... (90 %)
+Writing at 0x0005124b... (100 %)
+Wrote 273280 bytes (151379 compressed) at 0x00010000 in 0.9 seconds (effective 2332.2 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...
+================= [SUCCESS] Took 3.39 seconds =================
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/diagnostics/i2s-raw-dump$ pio device monitor --port /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00 --baud 115200
+--- Terminal on /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00 | 115200 8-N-1
+--- Available filters and text transformations: debug, default, direct, esp32_exception_decoder, hexlify, log2file, nocontrol, printable, send_on_enter, time
+--- More details at https://bit.ly/pio-monitor-filters
+--- Quit: Ctrl+C | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H
+00
+RAW[6]: 0xF9E49E00
+RAW[7]: 0xF9915400
+--------------------
+Rate: 16000 Hz | Min: -2725 | Max: 533 | Peak: 2725 | RMS: 934.3 | Clipped: 0
+Rate: 16016 Hz | Min: -3524 | Max: 1519 | Peak: 3524 | RMS: 997.6 | Clipped: 0
+Rate: 16000 Hz | Min: -2684 | Max: 511 | Peak: 2684 | RMS: 513.9 | Clipped: 0
+Rate: 16000 Hz | Min: -2483 | Max: 1023 | Peak: 2483 | RMS: 699.5 | Clipped: 0
+Rate: 16000 Hz | Min: -4643 | Max: 2033 | Peak: 4643 | RMS: 1135.9 | Clipped: 0
+
+--- RAW I2S DATA ---
+RAW[0]: 0x010C7A00
+RAW[1]: 0x00856200
+RAW[2]: 0x00886A00
+RAW[3]: 0x00E7D400
+RAW[4]: 0x013D1400
+RAW[5]: 0x0191C800
+RAW[6]: 0x02410000
+RAW[7]: 0x027E2800
+--------------------
+Rate: 16000 Hz | Min: -28902 | Max: 32494 | Peak: 32494 | RMS:1024.1 | Clipped: 0
+Rate: 16000 Hz | Min: -1390 | Max: 2035 | Peak: 2035 | RMS: 413.7 | Clipped: 0
+Rate: 16000 Hz | Min: -26231 | Max: 32380 | Peak: 32380 | RMS:1906.8 | Clipped: 0
+Rate: 16000 Hz | Min: -31701 | Max: 32611 | Peak: 32611 | RMS:1698.7 | Clipped: 0
+Rate: 16000 Hz | Min: -27148 | Max: 30303 | Peak: 30303 | RMS:1276.9 | Clipped: 0
+
+--- RAW I2S DATA ---
+RAW[0]: 0xF98E2600
+RAW[1]: 0xF95B4E00
+RAW[2]: 0xF95E1E00
+RAW[3]: 0xF97DBA00
+RAW[4]: 0xF9FBE000
+RAW[5]: 0xFA490200
+RAW[6]: 0xFA3C8200
+RAW[7]: 0xFA5C7200
+--------------------
+Rate: 16000 Hz | Min: -2287 | Max: 1023 | Peak: 2287 | RMS: 696.8 | Clipped: 0
+Rate: 16000 Hz | Min: -32435 | Max: 32433 | Peak: 32435 | RMS:5532.1 | Clipped: 0
+Rate: 16016 Hz | Min: -32596 | Max: 32557 | Peak: 32596 | RMS:5335.8 | Clipped: 0
+Rate: 16000 Hz | Min: -32316 | Max: 32669 | Peak: 32669 | RMS:4972.9 | Clipped: 0
+Rate: 16000 Hz | Min: -32510 | Max: 31800 | Peak: 32510 | RMS:4146.6 | Clipped: 0
+
+--- RAW I2S DATA ---
+RAW[0]: 0x0403AE00
+RAW[1]: 0x03CC9000
+RAW[2]: 0x0390DE00
+RAW[3]: 0x036F7800
+RAW[4]: 0x03219200
+RAW[5]: 0x02E57000
+RAW[6]: 0x02EC4800
+RAW[7]: 0x0377C800
+--------------------
+Rate: 16000 Hz | Min: -27934 | Max: 31842 | Peak: 31842 | RMS:4232.3 | Clipped: 0
+Rate: 16000 Hz | Min: -31014 | Max: 31080 | Peak: 31080 | RMS:2071.1 | Clipped: 0
+Rate: 16000 Hz | Min: -31687 | Max: 31902 | Peak: 31902 | RMS:6419.9 | Clipped: 0
+Rate: 16000 Hz | Min: -28106 | Max: 32745 | Peak: 32745 | RMS:3088.2 | Clipped: 0
+Rate: 16000 Hz | Min: -2035 | Max: 1822 | Peak: 2035 | RMS: 739.8 | Clipped: 0
+
+--- RAW I2S DATA ---
+RAW[0]: 0xF1564200
+RAW[1]: 0xEFB24000
+RAW[2]: 0xEECC2A00
+RAW[3]: 0xEE873200
+RAW[4]: 0xEE440400
+RAW[5]: 0xED643800
+RAW[6]: 0xEBEFF400
+RAW[7]: 0xE976DA00
+--------------------
+Rate: 16000 Hz | Min: -29236 | Max: 16345 | Peak: 29236 | RMS:5310.8 | Clipped: 0
+Rate: 16000 Hz | Min: -32237 | Max: 32758 | Peak: 32758 | RMS:8226.0 | Clipped: 0
+Rate: 16016 Hz | Min: -10603 | Max: 3316 | Peak: 10603 | RMS: 3706.2 | Clipped: 0
+Rate: 16000 Hz | Min: -4107 | Max: 3970 | Peak: 4107 | RMS: 922.9 | Clipped: 0
+Rate: 16000 Hz | Min: -5113 | Max: 1564 | Peak: 5113 | RMS: 990.4 | Clipped: 0
+
+--- RAW I2S DATA ---
+RAW[0]: 0x0000AA00
+RAW[1]: 0x02B23A00
+RAW[2]: 0x007ABE00
+RAW[3]: 0xF84DD400
+RAW[4]: 0xECCD4E00
+RAW[5]: 0xEFA85A00
+RAW[6]: 0x04CEC200
+RAW[7]: 0x02353A00
+--------------------
+Rate: 16000 Hz | Min: -21839 | Max: 8764 | Peak: 21839 | RMS: 3000.3 | Clipped: 0
+Rate: 16000 Hz | Min: -8240 | Max: 5561 | Peak: 8240 | RMS: 807.0 | Clipped: 0
+Rate: 16000 Hz | Min: -20545 | Max: 8185 | Peak: 20545 | RMS: 3228.2 | Clipped: 0
+Rate: 16000 Hz | Min: -8592 | Max: 3932 | Peak: 8592 | RMS: 1363.9 | Clipped: 0
+Rate: 16000 Hz | Min: -1831 | Max: 717 | Peak: 1831 | RMS: 574.5 | Clipped: 0
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/diagnostics/i2s-raw-dump$ 

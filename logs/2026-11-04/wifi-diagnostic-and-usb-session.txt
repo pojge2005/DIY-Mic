@@ -1,0 +1,375 @@
+user@host:~/Projects/DIY-Mic/firmware$ 
+user@host:~/Projects/DIY-Mic/firmware$ cd /home/user/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test
+
+cp src/main.cpp src/main.cpp.previous
+
+cat > src/main.cpp <<'EOF'
+#include <Arduino.h>
+#include <WiFi.h>
+#include <WebServer.h>
+
+const char *AP_SSID = "DIY-Mic-Setup";
+const char *AP_PASSWORD = "[REDACTED TEST PASSWORD]";
+
+IPAddress localIP(192, 168, 4, 1);
+IPAddress gateway(192, 168, 4, 1);
+IPAddress subnet(255, 255, 255, 0);
+
+WebServer server(80);
+
+bool apStarted = false;
+
+void handleRoot()
+{
+    server.send(
+        200,
+        "text/plain",
+        "DIY-Mic ESP32-C3 WiFi AP is working."
+    );
+}
+
+void handleHealth()
+{
+    String response = "{";
+    response += "\"status\":\"online\",";
+    response += "\"ip\":\"" + WiFi.softAPIP().toString() + "\",";
+    response += "\"clients\":";
+    response += String(WiFi.softAPgetStationNum());
+    response += "}";
+
+    server.send(200, "application/json", response);
+}
+
+void startAccessPoint()
+{
+    Serial.println("\n[1] Setting WiFi mode...");
+
+    if (!WiFi.mode(WIFI_AP))
+    {
+        Serial.println("ERROR: WIFI_AP mode failed.");
+        return;
+    }
+
+    Serial.println("WIFI_AP mode initialized.");
+
+    Serial.println("[2] Configuring AP address...");
+
+    if (!WiFi.softAPConfig(localIP, gateway, subnet))
+    {
+        Serial.println("ERROR: SoftAP IP configuration failed.");
+        return;
+    }
+
+    Serial.println("AP address configured.");
+
+    Serial.println("[3] Starting access point...");
+
+    apStarted = WiFi.softAP(
+        AP_SSID,
+        AP_PASSWORD,
+        6,
+        false,
+        4
+    );
+
+    if (!apStarted)
+    {
+        Serial.println("ERROR: SoftAP startup failed.");
+        return;
+    }
+
+    Serial.println("SUCCESS: Access point started.");
+    Serial.printf("SSID: %s\n", AP_SSID);
+    Serial.print("IP: ");
+    Serial.println(WiFi.softAPIP());
+
+    server.on("/", HTTP_GET, handleRoot);
+    server.on("/health", HTTP_GET, handleHealth);
+    server.begin();
+
+    Serial.println("HTTP server started.");
+}
+
+void setup()
+{
+    Serial.begin(115200);
+
+    unsigned long start = millis();
+
+    while (!Serial && millis() - start < 10000)
+    {
+        delay(10);
+    }
+
+    delay(500);
+
+    Serial.println("\n================================");
+    Serial.println("DIY-Mic WiFi Diagnostic");
+    Serial.println("ESP32-C3");
+    Serial.println("================================");
+
+    Serial.printf("Chip: %s\n", ESP.getChipModel());
+    Serial.printf("CPU: %u MHz\n", ESP.getCpuFreqMHz());
+    Serial.printf("Free heap: %u bytes\n", ESP.getFreeHeap());
+
+    startAccessPoint();
+}
+
+void loop()
+{
+    static unsigned long lastReport = 0;
+
+    if (apStarted)
+    {
+        server.handleClient();
+    }
+
+    if (millis() - lastReport >= 3000)
+    {
+        lastReport = millis();
+
+        Serial.printf(
+            "[STATUS] Uptime: %lu s | WiFi mode: %d | AP clients: %u | Heap: %u\n",
+            millis() / 1000,
+            WiFi.getMode(),
+            WiFi.softAPgetStationNum(),
+            ESP.getFreeHeap()
+        );
+
+        if (apStarted)
+        {
+            Serial.print("AP IP: ");
+            Serial.println(WiFi.softAPIP());
+        }
+    }
+
+    delay(2);
+}
+EOF
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ pio run
+Processing esp32-c3-supermini (platform: espressif32@6.10.0; board: esp32-c3-devkitm-1; framework: arduino)
+---------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32-c3-devkitm-1.html
+PLATFORM: Espressif 32 (6.10.0) > Espressif ESP32-C3-DevKitM-1
+HARDWARE: ESP32C3 160MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-builtin, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 1.40501.0 (4.5.1) 
+ - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 33 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- WebServer @ 2.0.0
+|-- WiFi @ 2.0.0
+Building in release mode
+Compiling .pio/build/esp32-c3-supermini/src/main.cpp.o
+Linking .pio/build/esp32-c3-supermini/firmware.elf
+Retrieving maximum program size .pio/build/esp32-c3-supermini/firmware.elf
+Checking size .pio/build/esp32-c3-supermini/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [=         ]  12.0% (used 39212 bytes from 327680 bytes)
+Flash: [======    ]  57.6% (used 755000 bytes from 1310720 bytes)
+Building .pio/build/esp32-c3-supermini/firmware.bin with action:
+  "$PYTHONEXE" "$OBJCOPY" --chip esp32c3 elf2image --flash_mode ${__get_board_flash_mode(__env__)} --flash_freq ${__get_board_f_image(__env__)} --flash_size 4MB --elf-sha256-offset 0xb0 -o $TARGET $SOURCES
+Building .pio/build/esp32-c3-supermini/firmware.bin
+esptool.py v4.5.1
+Creating esp32c3 image...
+Merged 2 ELF sections
+Successfully created esp32c3 image.
+==================== [SUCCESS] Took 4.87 seconds ====================
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ pio device monitor \
+  --port /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00 \
+  --baud 115200
+--- Terminal on /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00 | 115200 8-N-1
+--- Available filters and text transformations: debug, default, direct, esp32_exception_decoder, hexlify, log2file, nocontrol, printable,send_on_enter, time
+--- More details at https://bit.ly/pio-monitor-filters
+--- Quit: Ctrl+C | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H
+Disconnected ([Errno 5] Input/output error)
+Reconnecting to /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00     Connected!
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ ^C
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ cd /home/user/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test
+
+cp src/main.cpp src/main.cpp.wifi-diagnostic
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ 
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ #include <Arduino.h>
+
+unsigned long lastReport = 0;
+
+void setup()
+{
+    Serial.begin(115200);
+    delay(2000);
+
+    Serial.println();
+    Serial.println("================================");
+    Serial.println("DIY-Mic ESP32-C3 SERIAL TEST");
+    Serial.println("================================");
+
+    Serial.printf("Chip: %s\n", ESP.getChipModel());
+    Serial.printf("Revision: %d\n", ESP.getChipRevision());
+    Serial.printf("CPU: %u MHz\n", ESP.getCpuFreqMHz());
+    Serial.printf("Flash: %u bytes\n", ESP.getFlashChipSize());
+
+    Serial.println("Serial initialization successful.");
+}
+
+void loop()
+{
+    if (millis() - lastReport >= 1000)
+    {
+        lastReport = millis();
+
+        Serial.printf(
+            "HEARTBEAT | Uptime: %lu s | Free heap: %u bytes\n",
+            millis() / 1000,
+            ESP.getFreeHeap()
+        );
+    }
+
+    delay(10);
+}
+unsigned: command not found
+bash: syntax error near unexpected token `('
+bash: syntax error near unexpected token `115200'
+bash: syntax error near unexpected token `2000'
+bash: syntax error near unexpected token `;'
+bash: syntax error near unexpected token `"================================"'
+bash: syntax error near unexpected token `"DIY-Mic ESP32-C3 SERIAL TEST"'
+bash: syntax error near unexpected token `"================================"'
+bash: syntax error near unexpected token `"Chip: %s\n",'
+bash: syntax error near unexpected token `"Revision: %d\n",'
+bash: syntax error near unexpected token `"CPU: %u MHz\n",'
+bash: syntax error near unexpected token `"Flash: %u bytes\n",'
+bash: syntax error near unexpected token `"Serial initialization successful."'
+bash: syntax error near unexpected token `}'
+bash: syntax error near unexpected token `('
+bash: syntax error near unexpected token `-'
+bash: syntax error near unexpected token `('
+bash: syntax error near unexpected token `newline'
+HEARTBEAT | Uptime: %lu s | Free heap: %u bytes\n,: command not found
+bash: syntax error near unexpected token `/'
+bash: syntax error near unexpected token `)'
+bash: syntax error near unexpected token `}'
+bash: syntax error near unexpected token `10'
+bash: syntax error near unexpected token `}'
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ cat platformio.ini
+[env:esp32-c3-supermini]
+platform = espressif32@6.10.0
+board = esp32-c3-devkitm-1
+framework = arduino
+
+board_build.flash_size = 4MB
+
+monitor_speed = 115200
+monitor_port = /dev/ttyACM0
+
+upload_speed = 460800
+upload_port = /dev/ttyACM0
+
+build_flags =
+    -DARDUINO_USB_MODE=1
+    -DARDUINO_USB_CDC_ON_BOOT=1
+    -std=gnu++17
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ pio run
+Processing esp32-c3-supermini (platform: espressif32@6.10.0; board: esp32-c3-devkitm-1; framework: arduino)
+---------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32-c3-devkitm-1.html
+PLATFORM: Espressif 32 (6.10.0) > Espressif ESP32-C3-DevKitM-1
+HARDWARE: ESP32C3 160MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-builtin, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 1.40501.0 (4.5.1) 
+ - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 33 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- WebServer @ 2.0.0
+|-- WiFi @ 2.0.0
+Building in release mode
+Retrieving maximum program size .pio/build/esp32-c3-supermini/firmware.elf
+Checking size .pio/build/esp32-c3-supermini/firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [=         ]  12.0% (used 39212 bytes from 327680 bytes)
+Flash: [======    ]  57.6% (used 755000 bytes from 1310720 bytes)
+==================== [SUCCESS] Took 2.09 seconds ====================
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ pio device monitor \
+  --port /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00 \
+  --baud 115200
+--- Terminal on /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00 | 115200 8-N-1
+--- Available filters and text transformations: debug, default, direct, esp32_exception_decoder, hexlify, log2file, nocontrol, printable,send_on_enter, time
+--- More details at https://bit.ly/pio-monitor-filters
+--- Quit: Ctrl+C | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H
+^Cuser@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ ^C
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ ^C
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ ^C
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ echo "===== USB DEVICE ====="
+lsusb
+
+echo "===== SERIAL PORTS ====="
+ls -l /dev/ttyACM* /dev/serial/by-id/* 2>/dev/null
+
+echo "===== USB KERNEL LOG ====="
+sudo dmesg -T | tail -40
+===== USB DEVICE =====
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 001 Device 002: ID 1a2c:4c5e China Resource Semico Co., Ltd USB Keyboard
+Bus 001 Device 003: ID 1bcf:08a0 Sunplus Innovation Technology Inc. Gaming mouse [Philips SPK9304]
+Bus 001 Device 004: ID 1bcf:28b0 Sunplus Innovation Technology Inc. Integrated_Webcam_HD
+Bus 001 Device 005: ID 8087:0a2a Intel Corp. Bluetooth wireless interface
+Bus 001 Device 006: ID 0bda:0129 Realtek Semiconductor Corp. RTS5129Card Reader Controller
+Bus 001 Device 034: ID 303a:1001 Espressif USB JTAG/serial debug unit
+Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+===== SERIAL PORTS =====
+lrwxrwxrwx+ 1 root root        13 Nov  4 17:06 /dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_[REDACTED_DEVICE_MAC]-if00 -> ../../ttyACM1
+crw-rw-rw-+ 1 root dialout 166, 1 Nov  4 17:10 /dev/ttyACM1
+===== USB KERNEL LOG =====
+[sudo: authenticate] Password:     
+[Wed Nov  4 17:06:29 2026] usb 1-3: Manufacturer: Espressif
+[Wed Nov  4 17:06:29 2026] usb 1-3: SerialNumber: [REDACTED_DEVICE_MAC]
+[Wed Nov  4 17:06:29 2026] cdc_acm 1-3:1.0: ttyACM0: USB ACM device
+[Wed Nov  4 17:06:30 2026] usb 1-3: USB disconnect, device number 30
+[Wed Nov  4 17:06:30 2026] usb 1-3: new full-speed USB device number31 using xhci_hcd
+[Wed Nov  4 17:06:30 2026] usb 1-3: New USB device found, idVendor=303a, idProduct=1001, bcdDevice= 1.01
+[Wed Nov  4 17:06:30 2026] usb 1-3: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+[Wed Nov  4 17:06:30 2026] usb 1-3: Product: USB JTAG/serial debug unit
+[Wed Nov  4 17:06:30 2026] usb 1-3: Manufacturer: Espressif
+[Wed Nov  4 17:06:30 2026] usb 1-3: SerialNumber: [REDACTED_DEVICE_MAC]
+[Wed Nov  4 17:06:30 2026] cdc_acm 1-3:1.0: ttyACM0: USB ACM device
+[Wed Nov  4 17:06:41 2026] usb 1-3: USB disconnect, device number 31
+[Wed Nov  4 17:06:41 2026] usb 1-3: new full-speed USB device number32 using xhci_hcd
+[Wed Nov  4 17:06:42 2026] usb 1-3: New USB device found, idVendor=303a, idProduct=1001, bcdDevice= 1.01
+[Wed Nov  4 17:06:42 2026] usb 1-3: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+[Wed Nov  4 17:06:42 2026] usb 1-3: Product: USB JTAG/serial debug unit
+[Wed Nov  4 17:06:42 2026] usb 1-3: Manufacturer: Espressif
+[Wed Nov  4 17:06:42 2026] usb 1-3: SerialNumber: [REDACTED_DEVICE_MAC]
+[Wed Nov  4 17:06:42 2026] cdc_acm 1-3:1.0: ttyACM1: USB ACM device
+[Wed Nov  4 17:06:42 2026] usb 1-3: USB disconnect, device number 32
+[Wed Nov  4 17:06:42 2026] usb 1-3: new full-speed USB device number33 using xhci_hcd
+[Wed Nov  4 17:06:42 2026] usb 1-3: New USB device found, idVendor=303a, idProduct=1001, bcdDevice= 1.01
+[Wed Nov  4 17:06:42 2026] usb 1-3: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+[Wed Nov  4 17:06:42 2026] usb 1-3: Product: USB JTAG/serial debug unit
+[Wed Nov  4 17:06:42 2026] usb 1-3: Manufacturer: Espressif
+[Wed Nov  4 17:06:42 2026] usb 1-3: SerialNumber: [REDACTED_DEVICE_MAC]
+[Wed Nov  4 17:06:42 2026] cdc_acm 1-3:1.0: ttyACM1: USB ACM device
+[Wed Nov  4 17:06:48 2026] usb 1-3: USB disconnect, device number 33
+[Wed Nov  4 17:06:49 2026] usb 1-3: new full-speed USB device number34 using xhci_hcd
+[Wed Nov  4 17:06:49 2026] usb 1-3: New USB device found, idVendor=303a, idProduct=1001, bcdDevice= 1.01
+[Wed Nov  4 17:06:49 2026] usb 1-3: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+[Wed Nov  4 17:06:49 2026] usb 1-3: Product: USB JTAG/serial debug unit
+[Wed Nov  4 17:06:49 2026] usb 1-3: Manufacturer: Espressif
+[Wed Nov  4 17:06:49 2026] usb 1-3: SerialNumber: [REDACTED_DEVICE_MAC]
+[Wed Nov  4 17:06:49 2026] cdc_acm 1-3:1.0: ttyACM1: USB ACM device
+[Wed Nov  4 17:09:22 2026] audit: type=1400 audit(1793792362.878:312): apparmor="ALLOWED" operation="uring_sqpoll" class="io_uring" profile="snap.code.code" pid=105968 comm="cpptools-srv" requested="sqpoll"denied="sqpoll"
+[Wed Nov  4 17:10:49 2026] audit: type=1400 audit(1793792449.179:313): apparmor="DENIED" operation="file_inherit" class="file" profile="lsusb" name="/dev/ptmx" pid=106839 comm="lsusb" requested_mask="wr" denied_mask="wr" fsuid=1000 ouid=0
+[Wed Nov  4 17:10:49 2026] audit: type=1400 audit(1793792449.179:314): apparmor="DENIED" operation="file_inherit" class="file" profile="lsusb" name="/snap/code/271/usr/share/code/v8_context_snapshot.bin" pid=106839 comm="lsusb" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
+[Wed Nov  4 17:10:49 2026] audit: type=1400 audit(1793792449.181:315): apparmor="DENIED" operation="open" class="file" profile="lsusb" name="/snap/code/271/usr/lib/locale/aa_DJ.utf8/LC_CTYPE" pid=106839 comm="lsusb" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
+[Wed Nov  4 17:10:49 2026] audit: type=1400 audit(1793792449.181:316): apparmor="DENIED" operation="open" class="file" profile="lsusb" name="/snap/code/271/usr/lib/locale/aa_DJ/LC_CTYPE" pid=106839 comm="lsusb" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
+user@host:~/Projects/DIY-Mic/firmware/esp32-c3/experiments/wifi-softap-test$ 

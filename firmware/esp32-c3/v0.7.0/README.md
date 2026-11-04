@@ -67,3 +67,11 @@ The BLE draft is retained as an optional future reference only. It is not the V0
 ## Entry condition for coding
 
 Review [OPEN_ITEMS.md](docs/OPEN_ITEMS.md), verify the physical wiring and target receiver, then approve the protocol and test plan. Only then create the clean PlatformIO project.
+
+## Hardware Investigation Status — 2026-11-04
+
+The ESP32-C3 implementation path is now closed for the current iteration and preserved for reference. The C3 serial-only test passed during its captured observation window. The INMP441 I²S diagnostic produced sample data, but audio-format alignment and quality were not fully validated. The SoftAP test reported AP mode and IP configuration but failed the SSID-discovery acceptance test on Ubuntu. The cause was not isolated.
+
+The next hardware target is the ESP32-S3 family. The exact board/module must be identified before updating the board configuration, GPIO mapping, or PlatformIO target.
+
+See [the C3 session report](../../../docs/ESP32-C3-SESSION-2026-11-04.md).
