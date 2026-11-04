@@ -1,47 +1,45 @@
-# DIY-Mic V0.7.0 — Bluetooth-First Architecture Baseline
+# DIY-Mic V0.7.0 — Wi-Fi Audio Streaming Baseline
 
 **Status:** Documentation baseline; no firmware implementation included  
-**Target board:** ESP32-C3 Super Mini  
-**Microphone:** INMP441 I²S MEMS  
-**Primary link:** Bluetooth Low Energy (BLE)  
-**Receiver:** Browser-based dashboard with live listening and visualization  
-**Optional link:** Local Wi-Fi, not internet-dependent
+**Target board:** ESP32-C3 Super Mini (4 MB flash recorded; verify exact board)  
+**Microphone:** INMP441 I²S MEMS breakout  
+**Primary link:** ESP32-C3 Wi-Fi SoftAP + WebSocket  
+**Receiver:** Android/browser and Ubuntu/PC browser  
+**Optional future link:** BLE for control/discovery only, if needed
 
 ## Purpose
 
-V0.7.0 establishes the engineering requirements, hardware baseline, system architecture, protocol proposal, development plan, and verification criteria before firmware coding begins.
+V0.7.0 defines the product requirements, hardware baseline, system architecture, WebSocket audio protocol, receiver behavior, development roadmap and verification criteria before firmware coding begins.
 
-The required user experience is both:
-1. Live microphone listening on a connected phone or laptop.
-2. A web dashboard showing waveform, frequency spectrum, RMS/peak levels, and connection/stream diagnostics.
+The main use case is live wireless microphone audio streamed from the ESP32-C3 to a phone or computer over a direct local Wi-Fi connection. The ESP32-C3 runs a Wi-Fi access point; the receiver joins that network and connects to the audio WebSocket endpoint. An internet connection or external router is not required for the local audio path.
 
-The ESP32-C3 supports BLE, not Bluetooth Classic. This project will use a custom BLE GATT data service; it will not claim A2DP, Bluetooth Classic headset, or Bluetooth LE Audio compatibility.
+Live audio playback is the confirmed core receiver function. Waveform, spectrum/FFT and additional visual meters remain optional receiver enhancements until explicitly approved.
 
-## Important status labels
+## Status labels
 
-- **Confirmed:** Explicitly selected or recorded in project history.
+- **Confirmed:** Explicitly stated by the user or recorded as the selected project direction.
 - **Proposed:** Engineering starting point; requires validation.
 - **Unverified:** Must be checked on the physical board or measured.
-- **Deferred:** Deliberately excluded from the first implementation.
+- **Optional:** Not a release requirement unless separately approved.
 
 ## Documents
 
 | File | Purpose |
 |---|---|
-| [Product requirements](docs/PRODUCT_REQUIREMENTS.md) | User experience and measurable requirements |
-| [System architecture](docs/SYSTEM_ARCHITECTURE.md) | Device, BLE, receiver and optional Wi-Fi boundaries |
-| [Audio pipeline](docs/AUDIO_PIPELINE.md) | I²S capture, PCM, buffering, playback and FFT |
-| [BLE protocol draft](docs/BLE_PROTOCOL_DRAFT.md) | GATT services, packet framing and telemetry |
-| [Web receiver](docs/WEB_RECEIVER.md) | Browser compatibility, Web Bluetooth and Web Audio |
-| [Firmware architecture](docs/FIRMWARE_ARCHITECTURE.md) | Proposed modules and coding boundaries |
+| [Product requirements](docs/PRODUCT_REQUIREMENTS.md) | Core user experience and priorities |
+| [System architecture](docs/SYSTEM_ARCHITECTURE.md) | ESP32-C3, SoftAP, WebSocket and receiver |
+| [Audio pipeline](docs/AUDIO_PIPELINE.md) | I²S capture, PCM and buffering |
+| [Wi-Fi/WebSocket protocol](docs/WIFI_WEBSOCKET_PROTOCOL.md) | Audio frame and control protocol proposal |
+| [Web receiver](docs/WEB_RECEIVER.md) | Browser connection and live playback |
+| [Firmware architecture](docs/FIRMWARE_ARCHITECTURE.md) | Proposed source modules |
 | [Roadmap](docs/ROADMAP.md) | Phases and exit criteria |
-| [Test plan](docs/TEST_PLAN.md) | Bring-up, throughput, latency, quality and reliability |
+| [Test plan](docs/TEST_PLAN.md) | Bring-up, throughput, latency and reliability |
 | [Architecture decisions](docs/DECISIONS.md) | Decisions and rationale |
-| [Open items](docs/OPEN_ITEMS.md) | Questions that must be closed before implementation |
-| [Board configuration](hardware/BOARD_CONFIGURATION.md) | MCU and development baseline |
-| [Wiring and BOM](hardware/WIRING_AND_BOM.md) | Microphone wiring and minimum parts |
-| [PlatformIO baseline](development/PLATFORMIO_BASELINE.md) | Toolchain notes and pre-coding checks |
-| [Coding rules](AGENTS.md) | Implementation standards for later firmware work |
+| [Open items](docs/OPEN_ITEMS.md) | Questions to close before implementation |
+| [Board configuration](hardware/BOARD_CONFIGURATION.md) | MCU and pin baseline |
+| [Wiring and BOM](hardware/WIRING_AND_BOM.md) | INMP441 wiring and minimum parts |
+| [PlatformIO baseline](development/PLATFORMIO_BASELINE.md) | Toolchain checks |
+| [Coding rules](AGENTS.md) | Firmware implementation standards |
 
 ## Existing project references
 
@@ -54,17 +52,18 @@ The repository-level documents remain the historical project record:
 - `docs/TEST_RESULTS.md`
 - `docs/EXPERIMENT_LOG.md`
 
-Some existing documents describe Wi-Fi as the first ESP32-C3 transport. That was the earlier exploration direction. The current V0.7.0 requirement supersedes that transport priority: BLE is primary; Wi-Fi is optional. The older documents are not silently rewritten by this version baseline.
+The BLE draft is retained as an optional future reference only. It is not the V0.7.0 primary transport.
 
 ## Non-goals for this commit
 
-- No `platformio.ini` project implementation.
-- No C/C++ source or BLE firmware.
-- No browser application source.
-- No claim that BLE live audio has passed a throughput or latency test.
-- No battery/charger circuit design.
-- No changes to ESP8266 V0.5 or ESP32-C3 V0.6 source.
+- No `platformio.ini` implementation.
+- No C/C++ firmware source.
+- No receiver application source.
+- No claim that streaming throughput, latency or range has passed testing.
+- No battery/charger design.
+- No changes to V0.5 or V0.6 source.
+- No mandatory waveform/FFT dashboard requirement yet.
 
 ## Entry condition for coding
 
-Do not begin implementation until the open items in [OPEN_ITEMS.md](docs/OPEN_ITEMS.md) are reviewed, the exact board and microphone breakout are confirmed, and the staged test plan is accepted.
+Review [OPEN_ITEMS.md](docs/OPEN_ITEMS.md), verify the physical wiring and target receiver, then approve the protocol and test plan. Only then create the clean PlatformIO project.

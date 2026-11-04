@@ -1,55 +1,59 @@
 # Architecture Decision Records
 
-## ADR-001 — BLE is the primary connection
+## ADR-001 — Wi-Fi SoftAP is the primary connection
 
-**Status:** Accepted as the V0.7.0 product direction.
+**Status:** Accepted project direction.
 
-**Decision:** Use Bluetooth Low Energy as the normal connection between the ESP32-C3 microphone and receiver.
+**Decision:** ESP32-C3 starts a local Wi-Fi access point. Phone/PC receivers join it and receive audio through WebSocket.
 
-**Reason:** The user wants direct device-to-device operation that does not depend on internet or a router. BLE discovery/control and audio-data transport will be evaluated on the target devices.
+**Reason:** This is the recorded V0.7 direction for wireless audio streaming and browser/PC receiver access without an external router or internet connection.
 
-**Consequence:** Custom GATT audio data transport must be benchmarked. This is not Bluetooth Classic, A2DP or LE Audio.
+**Consequence:** WebSocket/TCP buffering, SoftAP behavior, phone network switching and sustained audio throughput must be tested on actual target devices.
 
-## ADR-002 — Both playback and visualization are required
-
-**Status:** Accepted.
-
-**Decision:** The receiver must play live audio and display waveform, frequency spectrum, RMS/peak and stream status concurrently.
-
-**Consequence:** Audio playback and visualization require separate processing paths so UI/FFT work cannot block audio rendering.
-
-## ADR-003 — Browser receiver is the initial receiver target
-
-**Status:** Accepted for initial investigation.
-
-**Decision:** Use Web Bluetooth and Web Audio APIs for Android Chrome and Chromium-based Ubuntu desktop as initial targets.
-
-**Consequence:** Browser support must be checked at runtime. Safari and Firefox compatibility is not assumed. A native receiver may be needed for unsupported platforms.
-
-## ADR-004 — Wi-Fi is optional, not primary
+## ADR-002 — Live audio playback is the core receiver feature
 
 **Status:** Accepted.
 
-**Decision:** Do not require Wi-Fi for normal operation. Preserve local Wi-Fi SoftAP as a possible fallback/high-bandwidth comparison.
+**Decision:** Receiver must play incoming microphone audio.
 
-**Reason:** The normal use case should remain direct and independent of external internet access. SoftAP itself does not require internet, but Wi-Fi is not the primary user-selected transport.
+**Consequence:** Audio buffering and playback are the first receiver implementation goals.
 
-**Consequence:** Keep Wi-Fi disabled in the first BLE implementation. Evaluate coexistence and performance only in a later isolated test.
+## ADR-003 — Visualization is optional
+
+**Status:** Not confirmed as a requirement.
+
+**Decision:** Waveform, FFT/spectrum and RMS/peak displays are optional enhancements, not mandatory V0.7.0 acceptance criteria.
+
+**Consequence:** Do not delay core streaming to implement visualizations.
+
+## ADR-004 — Browser/PC receiver targets
+
+**Status:** Initial targets recorded; exact browser versions remain open.
+
+**Decision:** Android/browser and Ubuntu/PC browser are initial receiver targets.
+
+**Consequence:** Test actual device/browser compatibility and local network behavior.
 
 ## ADR-005 — Start with uncompressed PCM
 
 **Status:** Proposed baseline.
 
-**Decision:** First benchmark mono 16 kHz, signed 16-bit PCM, using 10 ms logical frames.
+**Decision:** First benchmark mono 16 kHz signed 16-bit PCM using 10 ms logical frames.
 
-**Reason:** Simple to inspect and debug. The payload rate is 256 kbit/s before overhead.
+**Reason:** Simple to inspect and debug; raw payload is 256 kbit/s.
 
-**Consequence:** Actual BLE throughput must be measured. If inadequate, evaluate IMA ADPCM before adopting a more complex codec.
+**Consequence:** Measure throughput, latency, memory use and audio quality before freezing the format.
 
 ## ADR-006 — Minimal hardware first
 
 **Status:** Accepted.
 
-**Decision:** ESP32-C3 Super Mini + INMP441 + verified local decoupling only. USB-powered during bring-up. No display, buttons, sensors or battery system in the first revision.
+**Decision:** ESP32-C3 Super Mini + INMP441, USB powered during bring-up. No display, buttons, sensors or battery system in the first hardware revision.
 
-**Consequence:** Validate the core audio path before expanding hardware.
+**Consequence:** Validate core capture and streaming before adding peripherals.
+
+## ADR-007 — BLE is not the primary audio transport
+
+**Status:** Deferred.
+
+**Decision:** Do not build the first audio stream around BLE. Retain BLE only as a possible later discovery/control option if needed.
