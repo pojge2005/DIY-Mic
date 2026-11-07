@@ -15,6 +15,10 @@ Build the microphone in stages:
 
 The project is intentionally iterative. Hardware, firmware, receiver software, measurements, and decisions will be documented as development continues.
 
+## Active Development Track — ESP32-S3 BLE Bring-up
+
+A separate ESP32-S3 N16R8 + INMP441 track is now being documented under [ESP32-S3/](ESP32-S3/). Its current evidence covers BLE discovery, connection, GATT discovery, and a successful Status read returning `CONNECTED`. Control PING/PONG and Audio notifications remain pending until captured test output confirms them. This track does not replace or modify the historical ESP8266 and ESP32-C3 implementations.
+
 ## Architecture Diagram
 
 ![DIY-Mic system architecture](hardware/diagrams/system-architecture.png)
@@ -138,6 +142,11 @@ See [Tests and Diagnostics](tests/README.md) and [ESP8266 Serial Bring-up](firmw
 
 ```text
 DIY-Mic/
+├── ESP32-S3/
+│   ├── README.md
+│   ├── AGENTS.md
+│   ├── docs/
+│   └── tests/
 ├── .gitignore
 ├── .vscode/
 │   ├── extensions.json
@@ -175,7 +184,7 @@ DIY-Mic/
         └── pcm_inspect.py
 ```
 
-Planned receiver, ESP32-C3 firmware, USB dongle, PCB, and hardware test folders will be added when they contain actual implementation files.
+The ESP32-S3 BLE bring-up track is maintained separately in the root-level `ESP32-S3/` directory. Existing ESP8266 and ESP32-C3 implementation folders remain preserved. Planned receiver, USB dongle, PCB, and additional hardware test folders will be added when they contain actual implementation files.
 
 ## Development Roadmap
 

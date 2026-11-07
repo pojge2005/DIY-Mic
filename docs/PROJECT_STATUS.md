@@ -63,3 +63,26 @@ See [Minimal Circuit and BOM](ESP32-C3-MINI-CIRCUIT.md) and [GPIO Migration Plan
 ### Firmware Verification Status
 
 The architecture and implementation approach are documented, but the repository does not yet contain the verified V0.5 streaming firmware. The serial bring-up project is a separate toolchain smoke test and must not be confused with the live microphone implementation.
+
+
+## Parallel Development Track — ESP32-S3 BLE Bring-up
+
+A separate experimental track is maintained at the repository root in [ESP32-S3/](../ESP32-S3/). It uses the reported ESP32-S3 N16R8 target and INMP441 microphone.
+
+### BLE validation snapshot
+
+| Test | Status |
+|---|---|
+| BLE discovery | PASS (reported) |
+| BLE connection | PASS |
+| GATT service discovery | PASS (reported) |
+| Status characteristic read | PASS — ASCII `CONNECTED` |
+| Control write / PING-PONG | PENDING |
+| Audio notifications | PENDING |
+| Audio playback | NOT TESTED |
+
+The Status read returned hexadecimal `43 4f 4e 4e 45 43 54 45 44`, which decodes to `CONNECTED`. This confirms the connection/status read path only; it does not confirm control commands or audio streaming.
+
+The ESP32-S3 track does not replace the ESP8266 reference or ESP32-C3 work. No existing firmware was deleted, moved, or overwritten in this branch.
+
+See [ESP32-S3 BLE Test Report](../ESP32-S3/docs/BLE_TEST_REPORT.md), [GATT Specification](../ESP32-S3/docs/BLE_GATT_SPECIFICATION.md), and [Development Log](../ESP32-S3/docs/DEVELOPMENT_LOG.md).

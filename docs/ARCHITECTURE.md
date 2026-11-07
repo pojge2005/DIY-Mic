@@ -120,3 +120,21 @@ Keep these responsibilities separate:
 - Power: regulation, battery charging/protection, runtime measurement, and power modes.
 
 This separation allows the microphone and receiver software to evolve without coupling all features to one wireless protocol.
+
+
+## 7. Parallel Experimental Track — ESP32-S3 BLE
+
+A separate ESP32-S3 N16R8 + INMP441 track is being validated independently of the ESP8266 and ESP32-C3 paths.
+
+Current confirmed path:
+
+```text
+Ubuntu BLE client
+    -> ESP32-S3 GATT connection
+    -> Status characteristic read
+    -> ASCII "CONNECTED"
+```
+
+The custom service also defines Control and Audio characteristics. Control PING/PONG and Audio notifications are not yet confirmed by the available test evidence. Audio capture, packet format, throughput, latency, receiver compatibility, and power behavior remain open.
+
+See [ESP32-S3 Architecture](../ESP32-S3/docs/ARCHITECTURE.md), [GATT Specification](../ESP32-S3/docs/BLE_GATT_SPECIFICATION.md), and [BLE Test Report](../ESP32-S3/docs/BLE_TEST_REPORT.md).
