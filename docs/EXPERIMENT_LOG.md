@@ -1,6 +1,6 @@
 # Experiment Log
 
-This log records known development findings. Dates are retained where available; undocumented test details are not inferred.
+This log records known development findings. Dates are retained where available; undocumented test details are not inferred. For command procedures and captured terminal evidence, see the [project command library](../commands/README.md) and [log archive](../commands/logs/README.md).
 
 ## I²S Investigation
 
