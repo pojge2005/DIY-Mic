@@ -1,6 +1,6 @@
 # DIY-Mic Development Setup
 
-This guide records the development environment and repeatable commands used for the current ESP8266 prototype work. It is written for Ubuntu and Visual Studio Code.
+This guide records the development environment and repeatable commands used for the current ESP8266 prototype work. It is written for Ubuntu and Visual Studio Code. The central [command library](../commands/README.md) now indexes platform-specific commands, purposes, use cases, and terminal-log procedures.
 
 ## 1. Current development environment
 
