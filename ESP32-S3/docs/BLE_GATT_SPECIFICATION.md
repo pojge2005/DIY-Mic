@@ -1,5 +1,7 @@
 # BLE GATT Specification — ESP32-S3
 
+For host-side command execution and test logging, see the [ESP32-S3 Command Guide](../../commands/ESP32-S3.md).
+
 ## Peripheral
 
 - Advertised name: `DIY-Mic-S3`.
