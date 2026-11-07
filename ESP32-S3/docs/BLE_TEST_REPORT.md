@@ -2,34 +2,58 @@
 
 ## Test environment
 
-- Host: Ubuntu with BlueZ command-line BLE tools
-- Peripheral: DIY-Mic ESP32-S3
-- Report source: recorded bring-up output supplied for this repository update
-- Test date: not present in the supplied log
+- Host: Ubuntu with BlueZ command-line BLE tools.
+- Peripheral: DIY-Mic-S3.
+- BLE MAC observed: `30:ED:A0:A8:A4:F0`.
+- Chip: ESP32-S3 QFN56, revision v0.2.
+- Memory reported: 16 MB flash and 8 MB embedded PSRAM (AP_3v3).
+- Crystal: 40 MHz.
+- Chip identification date: 2026-11-06; exact BLE test timestamp not recorded.
 
-## Results
+## Confirmed results
 
-| Test | Result | Evidence / notes |
+| Test | Result | Evidence |
 |---|---|---|
-| BLE advertising / discovery | PASS (reported) | Device was discovered by the host |
-| BLE connection | PASS | Host connected to the ESP32-S3 |
-| GATT service discovery | PASS (reported) | Custom service was accessible |
-| Status characteristic read | PASS | Returned bytes `43 4f 4e 4e 45 43 54 45 44`, ASCII `CONNECTED` |
-| Control characteristic write | PENDING | No successful write output in the supplied report |
-| PING/PONG | PENDING | Expected command is `PING`; response `PONG` not yet evidenced |
-| Audio characteristic notifications | PENDING | No notification capture or audio payload evidence supplied |
-| Audio playback | NOT TESTED | No receiver playback evidence supplied |
+| BLE discovery | PASS (reported) | Peripheral discovered by Ubuntu |
+| BLE connection | PASS | Host connected to DIY-Mic-S3 |
+| GATT service discovery | PASS (reported) | Custom service and characteristics accessible |
+| Status characteristic read | PASS | `43 4f 4e 4e 45 43 54 45 44` = `CONNECTED` |
+
+## Pending tests
+
+| Test | Result | Required evidence |
+|---|---|---|
+| Control write | PENDING | BlueZ write result and no ATT error |
+| PING/PONG | PENDING | Actual PONG response and response characteristic |
+| Status notifications | PENDING | `notify on` result and captured notification if supported |
+| Audio subscription | PENDING | Audio characteristic `notify on` result |
+| Audio payload delivery | PENDING | Captured notifications with timestamps and lengths |
+| Audio playback | NOT TESTED | Decoded PCM capture and receiver playback |
+
+## BlueZ object paths observed
+
+| Characteristic | Object path |
+|---|---|
+| Status | `/org/bluez/hci0/dev_30_ED_A0_A8_A4_F0/service000e/char000f` |
+| Control | `/org/bluez/hci0/dev_30_ED_A0_A8_A4_F0/service000e/char0012` |
+| Audio | Not recorded; resolve by Audio UUID after `list-attributes` |
+
+Object paths may change after reconnecting. Resolve the current path from the live GATT list and match by UUID.
 
 ## Interpretation
 
-The successful status read confirms that the host connected and could read the device's Status characteristic. It does not establish successful control writes or audio notifications.
+The Status read proves the host could connect and read the Status characteristic. It does not prove Control writes, PING/PONG, Audio notifications, audio capture, or playback.
 
-## Required next evidence
+Audio streaming was disabled during the earlier control-channel test. The audio-start command is not established in the available source evidence.
 
-1. Capture the result of writing ASCII `PING` to the Control characteristic.
-2. Capture the corresponding `PONG` response, including the characteristic used to return it.
-3. Subscribe to the Audio characteristic and record whether notifications arrive.
-4. If notifications arrive, save a short raw capture and document payload length and timing.
-5. Record firmware commit, board revision, test date, and host BLE tool versions.
+## Next test sequence
 
-Update this report only from observed test output. Do not change PENDING to PASS based on expected behavior.
+1. Follow [Command Reference](COMMAND_REFERENCE.md).
+2. Read Status and save the output.
+3. Enable Status notifications only if supported by its GATT properties.
+4. Write ASCII PING (`50 49 4e 47`) to Control.
+5. Capture PONG and identify its response characteristic.
+6. Identify Audio by UUID and enable notifications.
+7. Confirm the audio-start command from firmware source before starting a stream.
+8. Capture notification payloads, lengths, and timestamps.
+9. Save a raw capture and document PCM format before playback tests.
