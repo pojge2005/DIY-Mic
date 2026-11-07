@@ -23,4 +23,4 @@
 - Audio format, MTU, throughput, latency, packet loss, and power are unmeasured.
 - Android and PC audio playback are not established.
 
-See [Command Reference](COMMAND_REFERENCE.md) for command execution and evidence collection.
+See [ESP32-S3 Command Guide](../../commands/ESP32-S3.md), [Command Reference](COMMAND_REFERENCE.md), and [terminal log archive](../../commands/logs/README.md) for command execution and evidence collection.
