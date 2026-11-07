@@ -55,3 +55,10 @@ Add future tests for packet framing, sequence loss, jitter buffering, latency, a
 - [ESP32-S3 BLE test guide](../ESP32-S3/tests/README.md)
 - [ESP32-S3 command reference](../ESP32-S3/docs/COMMAND_REFERENCE.md)
 - [ESP32-S3 board and GPIO configuration](../ESP32-S3/docs/HARDWARE_CONFIGURATION.md)
+
+
+## ESP32-S3 BLE tests
+
+- [ESP32-S3 BLE test guide](../ESP32-S3/tests/README.md)
+- [ESP32-S3 command reference](../ESP32-S3/docs/COMMAND_REFERENCE.md)
+- [ESP32-S3 board and GPIO configuration](../ESP32-S3/docs/HARDWARE_CONFIGURATION.md)

@@ -23,3 +23,13 @@ The ESP8266 V0.5 Wi-Fi microphone prototype remains the owner-reported working r
 - Added command-by-command PlatformIO, BlueZ `bluetoothctl`, and Python BLE test instructions with each command's purpose.
 - Added known BlueZ object paths for Status and Control from the supplied test notes.
 - Kept Control PING/PONG and Audio notification results pending actual output.
+
+
+## 2026-11-07 — ESP32-S3 Hardware and Command Documentation
+
+- Recorded reported ESP32-S3 QFN56 revision v0.2, 16 MB flash, 8 MB embedded PSRAM (AP_3v3), 40 MHz crystal, and BLE MAC.
+- Documented GPIO4/5/6 as a provisional INMP441 mapping, not a physically verified allocation.
+- Recorded that the exact carrier-board manufacturer/model and PCB revision remain unknown.
+- Added command-by-command PlatformIO, BlueZ `bluetoothctl`, and Python BLE test instructions with each command's purpose.
+- Added known BlueZ object paths for Status and Control from the supplied test notes.
+- Kept Control PING/PONG and Audio notification results pending actual output.
