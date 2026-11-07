@@ -1,5 +1,7 @@
 # ESP32-S3 Command Reference
 
+The project-wide command index is [commands/README.md](../../commands/README.md). For the full platform guide, purposes, use cases, and terminal-log procedure, see [ESP32-S3 Command Guide](../../commands/ESP32-S3.md).
+
 Commands are separated by execution environment. Shell commands run in Ubuntu Terminal. BlueZ commands run inside the interactive `bluetoothctl` prompt.
 
 ## 1. PlatformIO and serial commands
