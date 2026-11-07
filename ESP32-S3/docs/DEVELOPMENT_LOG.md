@@ -31,4 +31,4 @@ Provisional INMP441 GPIO proposal:
 - GPIO5 = WS/LRCLK.
 - GPIO6 = SD/DOUT.
 
-The mapping is not physically verified. The command reference documents PlatformIO, BlueZ, and Python commands with their purposes.
+The mapping is not physically verified. The project-wide command library is under [commands/](../../commands/README.md), with [ESP32-S3 command procedures](../../commands/ESP32-S3.md) and the [terminal log archive](../../commands/logs/README.md).
