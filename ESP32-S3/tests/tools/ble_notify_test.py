@@ -14,6 +14,10 @@ def show_data(label, data):
     print(f"{label} ASCII: {raw.decode('ascii', errors='replace')}")
 
 
+def notification(label):
+    return lambda _, data: show_data(label, data)
+
+
 async def run_test(address, listen_seconds):
     async with BleakClient(address) as client:
         print(f"Connected: {client.is_connected}")
@@ -21,23 +25,31 @@ async def run_test(address, listen_seconds):
         status = await client.read_gatt_char(STATUS_UUID)
         show_data("STATUS", status)
 
-        await client.start_notify(
-            STATUS_UUID,
-            lambda _, data: show_data("STATUS NOTIFY", data),
-        )
-        await client.start_notify(
-            AUDIO_UUID,
-            lambda _, data: show_data("AUDIO NOTIFY", data),
-        )
+        services = client.services
+        status_char = services.get_characteristic(STATUS_UUID)
+        control_char = services.get_characteristic(CONTROL_UUID)
+        audio_char = services.get_characteristic(AUDIO_UUID)
 
-        await client.write_gatt_char(CONTROL_UUID, b"PING", response=True)
-        print("Control write: completed")
+        if status_char and "notify" in status_char.properties:
+            await client.start_notify(STATUS_UUID, notification("STATUS NOTIFY"))
 
-        print(f"Listening for notifications for {listen_seconds} seconds...")
+        if audio_char and "notify" in audio_char.properties:
+            await client.start_notify(AUDIO_UUID, notification("AUDIO NOTIFY"))
+        else:
+            print("Audio notifications are not supported by this characteristic.")
+
+        if not control_char:
+            raise RuntimeError("Control characteristic was not found.")
+
+        response = "write" in control_char.properties
+        if not response and "write-without-response" not in control_char.properties:
+            raise RuntimeError("Control characteristic does not support writing.")
+
+        await client.write_gatt_char(CONTROL_UUID, b"PING", response=response)
+        print("Control write completed: PING")
+
+        print(f"Listening for {listen_seconds} seconds...")
         await asyncio.sleep(listen_seconds)
-
-        await client.stop_notify(STATUS_UUID)
-        await client.stop_notify(AUDIO_UUID)
 
 
 def main():
