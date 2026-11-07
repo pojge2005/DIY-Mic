@@ -1,0 +1,15 @@
+# Development History
+
+## 2026-11 — ESP32-S3 BLE Bring-up Baseline
+
+- Created the isolated root-level `ESP32-S3/` development track.
+- Recorded the reported ESP32-S3 N16R8 + INMP441 hardware target.
+- Recorded BLE discovery, connection, GATT discovery, and Status read as passed based on the supplied test log.
+- Status characteristic returned `43 4f 4e 4e 45 43 54 45 44` (`CONNECTED`).
+- Kept Control PING/PONG and Audio notifications pending because the supplied log did not include successful results.
+- Added a host-side Bleak test utility and its dependency file.
+- Preserved existing ESP8266 and ESP32-C3 implementation directories without modification.
+
+## Historical baseline
+
+The ESP8266 V0.5 Wi-Fi microphone prototype remains the owner-reported working reference described in the root README and test records. ESP32-C3 work remains available in its existing board-specific directory.

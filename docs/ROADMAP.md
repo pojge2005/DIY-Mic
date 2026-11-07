@@ -117,3 +117,21 @@ See [Receiver Options and Architecture](RECEIVER-OPTIONS-AND-ARCHITECTURE.md) fo
 ## Completion Policy
 
 A milestone is complete only when the relevant source, measurements, and test evidence are recorded. Planned or experimental features must not be described as working.
+
+
+## Parallel Track — ESP32-S3 BLE Bring-up
+
+This is a separate experimental track and does not change the historical ESP8266 / ESP32-C3 milestones.
+
+| Step | Work | Status |
+|---|---|---|
+| S3-01 | BLE discovery and connection | PASS (reported) |
+| S3-02 | GATT service discovery | PASS (reported) |
+| S3-03 | Status characteristic read | PASS — `CONNECTED` |
+| S3-04 | Control write and PING/PONG | Pending evidence |
+| S3-05 | Audio characteristic notifications | Pending evidence |
+| S3-06 | Confirm I²S wiring and capture | Not started / not evidenced |
+| S3-07 | Measure BLE throughput, latency, packet loss and power | Not started |
+| S3-08 | Validate Android and PC receiver behavior | Not started |
+
+The board-specific files and test tools are under [ESP32-S3/](../ESP32-S3/). Do not mark later steps complete until their test evidence is recorded.
