@@ -38,6 +38,8 @@ These results are observations from a prototype test. They have not yet been sup
 
 The host-side Python unit tests have been run successfully. The ESP8266 serial bring-up firmware has not yet been built or tested on physical hardware as part of this repository update.
 
+A central [project command library](../commands/README.md) now organizes terminal commands by platform and task, documents each command's execution location, purpose, and use case, and defines a dated terminal-log archive.
+
 ## Next Hardware Revision — Minimal ESP32-C3 Build
 
 The next hardware build is planned as a small, minimal circuit: ESP32-C3 Super Mini + INMP441 breakout + local 100 nF X7R decoupling (add only if the breakout does not already include it). A 100 kΩ SD pull-down is fitted only if it is not already present on the microphone breakout.
@@ -67,7 +69,7 @@ The architecture and implementation approach are documented, but the repository 
 
 ## Parallel Development Track — ESP32-S3 BLE Bring-up
 
-A separate experimental track is maintained at the repository root in [ESP32-S3/](../ESP32-S3/). It uses the reported ESP32-S3 N16R8 target and INMP441 microphone.
+A separate experimental track is maintained at the repository root in [ESP32-S3/](../ESP32-S3/). Reported chip details: ESP32-S3 QFN56 revision v0.2, 16 MB flash, 8 MB embedded PSRAM (AP_3v3), 40 MHz crystal, BLE MAC `30:ED:A0:A8:A4:F0`. Exact carrier-board model/revision is unknown. INMP441 GPIO4/5/6 is provisional and not physically validated. See [hardware configuration](../ESP32-S3/docs/HARDWARE_CONFIGURATION.md) and [command reference](../ESP32-S3/docs/COMMAND_REFERENCE.md).
 
 ### BLE validation snapshot
 
@@ -85,4 +87,4 @@ The Status read returned hexadecimal `43 4f 4e 4e 45 43 54 45 44`, which decodes
 
 The ESP32-S3 track does not replace the ESP8266 reference or ESP32-C3 work. No existing firmware was deleted, moved, or overwritten in this branch.
 
-See [ESP32-S3 BLE Test Report](../ESP32-S3/docs/BLE_TEST_REPORT.md), [GATT Specification](../ESP32-S3/docs/BLE_GATT_SPECIFICATION.md), and [Development Log](../ESP32-S3/docs/DEVELOPMENT_LOG.md).
+See [ESP32-S3 BLE Test Report](../ESP32-S3/docs/BLE_TEST_REPORT.md), [GATT Specification](../ESP32-S3/docs/BLE_GATT_SPECIFICATION.md), [Development Log](../ESP32-S3/docs/DEVELOPMENT_LOG.md), and the [project command library](../commands/README.md).

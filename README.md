@@ -17,7 +17,7 @@ The project is intentionally iterative. Hardware, firmware, receiver software, m
 
 ## Active Development Track — ESP32-S3 BLE Bring-up
 
-A separate ESP32-S3 N16R8 + INMP441 track is now being documented under [ESP32-S3/](ESP32-S3/). Its current evidence covers BLE discovery, connection, GATT discovery, and a successful Status read returning `CONNECTED`. Control PING/PONG and Audio notifications remain pending until captured test output confirms them. This track does not replace or modify the historical ESP8266 and ESP32-C3 implementations.
+A separate ESP32-S3 N16R8 + INMP441 track is documented under [ESP32-S3/](ESP32-S3/). Reported chip details are ESP32-S3 QFN56 revision v0.2, 16 MB flash, 8 MB embedded PSRAM (AP_3v3), and a 40 MHz crystal. The exact carrier-board model is not yet identified. INMP441 GPIO4/5/6 remains provisional. BLE discovery, connection, GATT discovery, and Status read are recorded; Control PING/PONG and Audio notifications remain pending. See the [board/GPIO record](ESP32-S3/docs/HARDWARE_CONFIGURATION.md) and [command reference](ESP32-S3/docs/COMMAND_REFERENCE.md). This track does not replace or modify the historical ESP8266 and ESP32-C3 implementations.
 
 ## Architecture Diagram
 
@@ -138,10 +138,22 @@ python3 -m unittest discover -s tests -p 'test_*.py' -v
 
 See [Tests and Diagnostics](tests/README.md) and [ESP8266 Serial Bring-up](firmware/esp8266/serial-bringup/README.md).
 
+## Project Command Library
+
+All project terminal commands are organized under [commands/](commands/). The guides separate Ubuntu shell commands from commands entered inside `bluetoothctl`, explain each command's purpose and use case, and link to the terminal log archive. Start with [Command Library](commands/README.md).
+
 ## Current Repository Structure
 
 ```text
 DIY-Mic/
+├── commands/
+│   ├── README.md
+│   ├── ESP32-S3.md
+│   ├── ESP32-C3.md
+│   ├── ESP8266.md
+│   ├── GIT.md
+│   ├── HOST-TESTS.md
+│   └── logs/
 ├── ESP32-S3/
 │   ├── README.md
 │   ├── AGENTS.md

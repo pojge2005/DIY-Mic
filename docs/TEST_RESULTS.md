@@ -1,6 +1,8 @@
 # Test Results
 
-## V0.5 — Android Live Audio Test
+The project-wide [command library](../commands/README.md) documents how to run host tests and save terminal evidence. ESP32-S3 BLE results are tracked separately in [the BLE test report](../ESP32-S3/docs/BLE_TEST_REPORT.md).
+
+
 
 **Test date:** 2026-11-02  
 **Platform:** Android browser connected to the ESP8266 access point

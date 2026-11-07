@@ -48,3 +48,12 @@ The utility reports sample count, duration, peak amplitude, RMS amplitude, mean/
 - The PCM format must match the actual capture file. Confirm sample rate, bit depth, channel count, and byte order before interpreting results.
 
 Add future tests for packet framing, sequence loss, jitter buffering, latency, and receiver reconnection after the common protocol has been specified.
+
+
+## ESP32-S3 BLE tests
+
+- [ESP32-S3 BLE test guide](../ESP32-S3/tests/README.md)
+- [ESP32-S3 command guide](../commands/ESP32-S3.md)
+- [Project command index](../commands/README.md)
+- [ESP32-S3 board and GPIO configuration](../ESP32-S3/docs/HARDWARE_CONFIGURATION.md)
+

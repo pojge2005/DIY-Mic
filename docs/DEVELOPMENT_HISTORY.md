@@ -13,3 +13,22 @@
 ## Historical baseline
 
 The ESP8266 V0.5 Wi-Fi microphone prototype remains the owner-reported working reference described in the root README and test records. ESP32-C3 work remains available in its existing board-specific directory.
+
+
+## 2026-11-07 — ESP32-S3 Hardware and Command Documentation
+
+- Recorded reported ESP32-S3 QFN56 revision v0.2, 16 MB flash, 8 MB embedded PSRAM (AP_3v3), 40 MHz crystal, and BLE MAC.
+- Documented GPIO4/5/6 as a provisional INMP441 mapping, not a physically verified allocation.
+- Recorded that the exact carrier-board manufacturer/model and PCB revision remain unknown.
+- Added command-by-command PlatformIO, BlueZ `bluetoothctl`, and Python BLE test instructions with each command's purpose.
+- Added known BlueZ object paths for Status and Control from the supplied test notes.
+- Kept Control PING/PONG and Audio notification results pending actual output.
+
+## 2026-11-07 — Central Command and Log Library
+
+- Added the root-level `commands/` index and platform-specific command guides for ESP32-S3, ESP32-C3, and ESP8266.
+- Added Git and host-test command guides.
+- Added a dated terminal-log archive with naming, capture, metadata, and evidence rules.
+- Archived the supplied ESP32-S3 Status-read output without inventing a full terminal transcript.
+- Linked the command library from the project README, test guides, status, roadmap, and BLE report.
+

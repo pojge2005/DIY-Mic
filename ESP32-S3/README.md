@@ -1,14 +1,23 @@
 # DIY-Mic — ESP32-S3 BLE Bring-up
 
-This directory contains the isolated ESP32-S3 development track. It is located at the repository root so board-specific work is not mixed into the historical ESP8266 or ESP32-C3 directories.
+This is the isolated ESP32-S3 development track at the repository root. It does not replace or modify the ESP8266 or ESP32-C3 history.
 
-## Hardware
+## Hardware baseline
 
-- MCU: ESP32-S3 N16R8 (reported board/module configuration; exact board revision still needs recording)
-- Microphone: INMP441 I²S MEMS microphone
-- Current focus: BLE GATT discovery, connection, status/control characteristics, and notification testing
+- SoC: ESP32-S3, QFN56, silicon revision v0.2.
+- Flash: 16 MB.
+- PSRAM: 8 MB embedded, AP_3v3.
+- Crystal: 40 MHz.
+- BLE MAC observed: `30:ED:A0:A8:A4:F0`.
+- Project target: N16R8.
+- Microphone: INMP441 I²S MEMS breakout.
+- Exact carrier-board manufacturer/model and PCB revision: not yet identified.
 
-## Directory layout
+GPIO4=BCLK, GPIO5=WS/LRCLK, GPIO6=SD/DOUT is provisional only. Verify it against the physical board pinout before wiring permanently.
+
+See [Board and GPIO Configuration](docs/HARDWARE_CONFIGURATION.md), [ESP32-S3 Command Guide](../commands/ESP32-S3.md), and the [project-wide Command Library](../commands/README.md). The board-specific [Command Reference](docs/COMMAND_REFERENCE.md) remains the detailed BLE procedure.
+
+## Structure
 
 ```text
 ESP32-S3/
@@ -18,8 +27,9 @@ ESP32-S3/
 │   ├── ARCHITECTURE.md
 │   ├── BLE_GATT_SPECIFICATION.md
 │   ├── BLE_TEST_REPORT.md
-│   ├── HARDWARE_CONFIGURATION.md
+│   ├── COMMAND_REFERENCE.md
 │   ├── DEVELOPMENT_LOG.md
+│   ├── HARDWARE_CONFIGURATION.md
 │   └── KNOWN_ISSUES.md
 └── tests/
     ├── README.md
@@ -28,27 +38,46 @@ ESP32-S3/
         └── requirements.txt
 ```
 
-Firmware implementation will be added in this board-specific directory only after the BLE bring-up baseline and hardware details are reviewed. No existing firmware is moved, deleted, or overwritten by this change.
+## BLE status
 
-## Current BLE evidence
-
-| Check | Result |
+| Test | Status |
 |---|---|
-| BLE advertising / device discovery | Reported PASS |
-| BLE connection from Ubuntu | PASS |
-| GATT service discovery | PASS |
-| Status characteristic read | PASS — returned ASCII `CONNECTED` |
-| Control characteristic write / PING-PONG | PENDING in the available test log |
-| Audio characteristic notifications | PENDING in the available test log |
+| BLE discovery | PASS (reported) |
+| BLE connection | PASS |
+| GATT discovery | PASS (reported) |
+| Status read | PASS — CONNECTED |
+| Control write / PING-PONG | PENDING |
+| Audio notifications | PENDING |
+| Audio playback | NOT TESTED |
 
-See [BLE Test Report](docs/BLE_TEST_REPORT.md) and [GATT Specification](docs/BLE_GATT_SPECIFICATION.md).
+The recorded Status read was `43 4f 4e 4e 45 43 54 45 44` (ASCII `CONNECTED`).
 
-## Host test setup
+## Command documentation
+
+- [ESP32-S3 terminal commands, purpose, and use cases](../commands/ESP32-S3.md)
+- [Project-wide command index](../commands/README.md)
+- [Terminal log archive and capture rules](../commands/logs/README.md)
+
+## Run the Python BLE test utility
+
+From the repository root:
 
 ```bash
-cd ESP32-S3/tests/tools
-python3 -m pip install -r requirements.txt
-python3 ble_notify_test.py --help
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r ESP32-S3/tests/tools/requirements.txt
+python3 ESP32-S3/tests/tools/ble_notify_test.py --address 30:ED:A0:A8:A4:F0 --listen-seconds 10
 ```
 
-Do not mark a test as PASS until its output has been recorded in the test report.
+The utility reads Status, subscribes to Status and Audio when supported, writes PING to Control, and prints received data. It does not send an undocumented audio-start command.
+
+## Firmware status
+
+This track currently documents BLE bring-up and host-side test tools. It is not a complete microphone firmware release. See the command reference for PlatformIO build, upload, and serial-monitor commands.
+
+## Reports
+
+- [BLE Test Report](docs/BLE_TEST_REPORT.md)
+- [GATT Specification](docs/BLE_GATT_SPECIFICATION.md)
+- [Development Log](docs/DEVELOPMENT_LOG.md)
+- [Known Issues](docs/KNOWN_ISSUES.md)
