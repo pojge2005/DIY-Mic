@@ -38,6 +38,8 @@ These results are observations from a prototype test. They have not yet been sup
 
 The host-side Python unit tests have been run successfully. The ESP8266 serial bring-up firmware has not yet been built or tested on physical hardware as part of this repository update.
 
+A central [project command library](../commands/README.md) now organizes terminal commands by platform and task, documents each command's execution location, purpose, and use case, and defines a dated terminal-log archive.
+
 ## Next Hardware Revision — Minimal ESP32-C3 Build
 
 The next hardware build is planned as a small, minimal circuit: ESP32-C3 Super Mini + INMP441 breakout + local 100 nF X7R decoupling (add only if the breakout does not already include it). A 100 kΩ SD pull-down is fitted only if it is not already present on the microphone breakout.
@@ -85,4 +87,4 @@ The Status read returned hexadecimal `43 4f 4e 4e 45 43 54 45 44`, which decodes
 
 The ESP32-S3 track does not replace the ESP8266 reference or ESP32-C3 work. No existing firmware was deleted, moved, or overwritten in this branch.
 
-See [ESP32-S3 BLE Test Report](../ESP32-S3/docs/BLE_TEST_REPORT.md), [GATT Specification](../ESP32-S3/docs/BLE_GATT_SPECIFICATION.md), and [Development Log](../ESP32-S3/docs/DEVELOPMENT_LOG.md).
+See [ESP32-S3 BLE Test Report](../ESP32-S3/docs/BLE_TEST_REPORT.md), [GATT Specification](../ESP32-S3/docs/BLE_GATT_SPECIFICATION.md), [Development Log](../ESP32-S3/docs/DEVELOPMENT_LOG.md), and the [project command library](../commands/README.md).
