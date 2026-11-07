@@ -67,7 +67,7 @@ The architecture and implementation approach are documented, but the repository 
 
 ## Parallel Development Track — ESP32-S3 BLE Bring-up
 
-A separate experimental track is maintained at the repository root in [ESP32-S3/](../ESP32-S3/). It uses the reported ESP32-S3 N16R8 target and INMP441 microphone.
+A separate experimental track is maintained at the repository root in [ESP32-S3/](../ESP32-S3/). Reported chip details: ESP32-S3 QFN56 revision v0.2, 16 MB flash, 8 MB embedded PSRAM (AP_3v3), 40 MHz crystal, BLE MAC `30:ED:A0:A8:A4:F0`. Exact carrier-board model/revision is unknown. INMP441 GPIO4/5/6 is provisional and not physically validated. See [hardware configuration](../ESP32-S3/docs/HARDWARE_CONFIGURATION.md) and [command reference](../ESP32-S3/docs/COMMAND_REFERENCE.md).
 
 ### BLE validation snapshot
 
