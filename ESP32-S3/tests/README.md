@@ -36,6 +36,12 @@ python3 ESP32-S3/tests/tools/ble_notify_test.py --address 30:ED:A0:A8:A4:F0 --li
 
 The script does not send an undocumented audio-start command. If audio is disabled in firmware, no Audio notifications may arrive even if subscription succeeds.
 
+## Command library
+
+- [ESP32-S3 command guide](../../commands/ESP32-S3.md)
+- [Project command index](../../commands/README.md)
+- [Terminal log archive](../../commands/logs/README.md)
+
 ## Interactive BlueZ commands
 
 Follow [Command Reference](../docs/COMMAND_REFERENCE.md) for discovery, GATT inspection, Status read, PING/PONG, and Audio notification subscription.
