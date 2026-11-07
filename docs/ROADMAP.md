@@ -134,4 +134,4 @@ This is a separate experimental track and does not change the historical ESP8266
 | S3-07 | Measure BLE throughput, latency, packet loss and power | Not started |
 | S3-08 | Validate Android and PC receiver behavior | Not started |
 
-The board-specific files and test tools are under [ESP32-S3/](../ESP32-S3/). Chip identification is recorded, but exact carrier-board identity and final GPIO mapping remain open. The command-by-command procedure is in [Command Reference](../ESP32-S3/docs/COMMAND_REFERENCE.md). Do not mark later steps complete until test evidence is recorded.
+The board-specific files and test tools are under [ESP32-S3/](../ESP32-S3/). Chip identification is recorded, but exact carrier-board identity and final GPIO mapping remain open. Project commands are indexed in the [command library](../commands/README.md), with a detailed [ESP32-S3 command guide](../commands/ESP32-S3.md) and dated [terminal logs](../commands/logs/README.md). Do not mark later steps complete until test evidence is recorded.
