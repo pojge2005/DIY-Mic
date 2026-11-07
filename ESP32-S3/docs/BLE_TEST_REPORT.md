@@ -10,6 +10,10 @@
 - Crystal: 40 MHz.
 - Chip identification date: 2026-11-06; exact BLE test timestamp not recorded.
 
+## Raw terminal evidence
+
+The supplied Status-read evidence is archived in [2026-11-06 ESP32-S3 BLE Status Read](../../commands/logs/2026-11-06_esp32-s3_ble-status-read.md). The source notes give 2026-11-06 as the chip-identification date, not an exact BLE test timestamp. No full raw interactive terminal transcript was supplied; the archived record preserves only the exact output and test details provided.
+
 ## Confirmed results
 
 | Test | Result | Evidence |
@@ -48,7 +52,7 @@ Audio streaming was disabled during the earlier control-channel test. The audio-
 
 ## Next test sequence
 
-1. Follow [Command Reference](COMMAND_REFERENCE.md).
+1. Follow [ESP32-S3 Command Guide](../../commands/ESP32-S3.md) and [Command Reference](COMMAND_REFERENCE.md).
 2. Read Status and save the output.
 3. Enable Status notifications only if supported by its GATT properties.
 4. Write ASCII PING (`50 49 4e 47`) to Control.
