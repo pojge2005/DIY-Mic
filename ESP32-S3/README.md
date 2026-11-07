@@ -15,7 +15,7 @@ This is the isolated ESP32-S3 development track at the repository root. It does 
 
 GPIO4=BCLK, GPIO5=WS/LRCLK, GPIO6=SD/DOUT is provisional only. Verify it against the physical board pinout before wiring permanently.
 
-See [Board and GPIO Configuration](docs/HARDWARE_CONFIGURATION.md) and [Command Reference](docs/COMMAND_REFERENCE.md).
+See [Board and GPIO Configuration](docs/HARDWARE_CONFIGURATION.md), [ESP32-S3 Command Guide](../commands/ESP32-S3.md), and the [project-wide Command Library](../commands/README.md). The board-specific [Command Reference](docs/COMMAND_REFERENCE.md) remains the detailed BLE procedure.
 
 ## Structure
 
@@ -51,6 +51,12 @@ ESP32-S3/
 | Audio playback | NOT TESTED |
 
 The recorded Status read was `43 4f 4e 4e 45 43 54 45 44` (ASCII `CONNECTED`).
+
+## Command documentation
+
+- [ESP32-S3 terminal commands, purpose, and use cases](../commands/ESP32-S3.md)
+- [Project-wide command index](../commands/README.md)
+- [Terminal log archive and capture rules](../commands/logs/README.md)
 
 ## Run the Python BLE test utility
 
