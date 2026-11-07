@@ -138,10 +138,22 @@ python3 -m unittest discover -s tests -p 'test_*.py' -v
 
 See [Tests and Diagnostics](tests/README.md) and [ESP8266 Serial Bring-up](firmware/esp8266/serial-bringup/README.md).
 
+## Project Command Library
+
+All project terminal commands are organized under [commands/](commands/). The guides separate Ubuntu shell commands from commands entered inside `bluetoothctl`, explain each command's purpose and use case, and link to the terminal log archive. Start with [Command Library](commands/README.md).
+
 ## Current Repository Structure
 
 ```text
 DIY-Mic/
+├── commands/
+│   ├── README.md
+│   ├── ESP32-S3.md
+│   ├── ESP32-C3.md
+│   ├── ESP8266.md
+│   ├── GIT.md
+│   ├── HOST-TESTS.md
+│   └── logs/
 ├── ESP32-S3/
 │   ├── README.md
 │   ├── AGENTS.md
