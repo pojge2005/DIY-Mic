@@ -49,3 +49,17 @@ Follow [Command Reference](../docs/COMMAND_REFERENCE.md) for discovery, GATT ins
 ## Evidence
 
 Copy full command output into [BLE Test Report](../docs/BLE_TEST_REPORT.md). Record date, board/firmware revision, address, command, characteristic UUID, output, and result. Do not mark expected behavior as PASS without observed output.
+
+
+## INMP441 I²S hardware diagnostic
+
+The ESP32-S3 INMP441 diagnostic is currently an experimental firmware test, separate from the host-side BLE utility. The supplied 2026-11-09 serial output is archived in [the I²S test report](../docs/I2S_TEST_REPORT.md) and [the terminal log](../../commands/logs/2026-11-09_esp32-s3_inmp441-i2s-diagnostic.log).
+
+Current result:
+- I²S driver initialization: PASS.
+- Stable non-zero capture: NOT VERIFIED.
+- Raw 24-bit alignment and sample conversion: NOT VERIFIED.
+- Clean PCM audio: NOT VERIFIED.
+- Physical GPIO mapping and microphone supply: pending verification.
+
+Do not use the current experimental capture as an audio-streaming source. Do not mark I²S capture as PASS until the raw sample format, selected channel, physical wiring, and controlled speech response are verified. The temporary diagnostic sketch is not treated as production firmware.
