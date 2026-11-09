@@ -80,4 +80,19 @@ The final `platformio.ini` must match the verified flash size, flash mode, PSRAM
 | PCB revision | Not identified |
 | PCB photo / silkscreen evidence | Not recorded |
 | Final GPIO allocation | Pending physical validation |
-| INMP441 wiring test | Pending |
+| INMP441 wiring test | I²S driver initializes; stable PCM not verified |
+
+
+## 2026-11-09 I²S diagnostic status
+
+A temporary I²S0 master-RX test was run at 16 kHz with 32-bit slots and `RIGHT_LEFT` channel format. The driver initialized successfully, but the supplied serial output showed intermittent zero-data windows, intermittent non-zero raw words, and repeated clipping warnings after the candidate `raw >> 8` conversion.
+
+This test does not validate GPIO4/5/6 or prove that the microphone is producing valid PCM. Raw words did not consistently have a zero least-significant byte, and even/odd slot behavior was inconsistent across reports. The exact root cause is unknown.
+
+Before changing the GPIO mapping:
+1. Identify the exact carrier-board model and PCB revision.
+2. Inspect the physical wiring and verify the microphone's L/R connection.
+3. Measure VDD directly at the INMP441 breakout relative to its GND.
+4. Re-run the raw capture only after the pinout and supply have been checked.
+
+See [INMP441 I²S Diagnostic Report](I2S_TEST_REPORT.md). GPIO4/5/6 remains provisional.
