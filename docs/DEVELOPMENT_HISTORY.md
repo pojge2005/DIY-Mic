@@ -32,3 +32,14 @@ The ESP8266 V0.5 Wi-Fi microphone prototype remains the owner-reported working r
 - Archived the supplied ESP32-S3 Status-read output without inventing a full terminal transcript.
 - Linked the command library from the project README, test guides, status, roadmap, and BLE report.
 
+
+
+## 2026-11-09 — ESP32-S3 INMP441 I²S diagnostic
+
+- Added an I²S diagnostic report and archived the serial output supplied during the session.
+- Recorded I²S driver initialization as PASS.
+- Recorded intermittent non-zero raw data, zero-data windows, and clipping warnings in channel statistics.
+- Recorded that raw sample alignment and the `raw >> 8` conversion are not verified.
+- Kept microphone capture acceptance FAIL / NOT VERIFIED; no valid PCM or acoustic response was established.
+- Kept GPIO4/5/6 provisional because the exact carrier-board pinout and physical wiring have not been verified.
+- Did not change the historical ESP8266 or ESP32-C3 implementation or claim BLE audio streaming.
