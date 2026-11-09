@@ -204,7 +204,8 @@ SLOT B (odd words): POSSIBLE CLIPPING
 
 ---------- CHANNEL REPORT ----------
 SLOT A (even words) | Samples: 16128 | MIN: -8380408 | MAX: 8388607 | RMS: 1493347.04
-SLOT A (odd words) | Samples: 16128 | MIN: -8388608 | MAX: 8350373 | RMS: 1316674.44
+SLOT A (even words): POSSIBLE CLIPPING
+SLOT B (odd words) | Samples: 16128 | MIN: -8388608 | MAX: 8350373 | RMS: 1316674.44
 SLOT B (odd words): POSSIBLE CLIPPING
 ------------------------------------
 ```
