@@ -85,6 +85,12 @@ A separate experimental track is maintained at the repository root in [ESP32-S3/
 
 The Status read returned hexadecimal `43 4f 4e 4e 45 43 54 45 44`, which decodes to `CONNECTED`. This confirms the connection/status read path only; it does not confirm control commands or audio streaming.
 
+### ESP32-S3 I²S microphone validation
+
+The 2026-11-09 diagnostic reported I²S driver initialization PASS, but stable microphone PCM was not established. Non-zero raw words appeared intermittently; some reporting windows showed one or both slots as zero; other windows reached candidate 24-bit extrema and triggered clipping warnings. Raw word alignment and the `raw >> 8` conversion remain unverified. Physical wiring, exact carrier-board pinout, and microphone supply voltage have not been confirmed.
+
+Overall I²S capture acceptance: **FAIL / NOT VERIFIED**. Do not mark the microphone path as working or integrate it into BLE audio yet. See [I²S Diagnostic Report](../ESP32-S3/docs/I2S_TEST_REPORT.md) and [supplied serial output](../commands/logs/2026-11-09_esp32-s3_inmp441-i2s-diagnostic.log).
+
 The ESP32-S3 track does not replace the ESP8266 reference or ESP32-C3 work. No existing firmware was deleted, moved, or overwritten in this branch.
 
 See [ESP32-S3 BLE Test Report](../ESP32-S3/docs/BLE_TEST_REPORT.md), [GATT Specification](../ESP32-S3/docs/BLE_GATT_SPECIFICATION.md), [Development Log](../ESP32-S3/docs/DEVELOPMENT_LOG.md), and the [project command library](../commands/README.md).
