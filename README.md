@@ -17,7 +17,7 @@ The project is intentionally iterative. Hardware, firmware, receiver software, m
 
 ## Active Development Track — ESP32-S3 BLE Bring-up
 
-A separate ESP32-S3 N16R8 + INMP441 track is documented under [ESP32-S3/](ESP32-S3/). Reported chip details are ESP32-S3 QFN56 revision v0.2, 16 MB flash, 8 MB embedded PSRAM (AP_3v3), and a 40 MHz crystal. The exact carrier-board model is not yet identified. INMP441 GPIO4/5/6 remains provisional. BLE discovery, connection, GATT discovery, and Status read are recorded; Control PING/PONG and Audio notifications remain pending. See the [board/GPIO record](ESP32-S3/docs/HARDWARE_CONFIGURATION.md) and [command reference](ESP32-S3/docs/COMMAND_REFERENCE.md). This track does not replace or modify the historical ESP8266 and ESP32-C3 implementations.
+A separate ESP32-S3 N16R8 + INMP441 track is documented under [ESP32-S3/](ESP32-S3/). Reported chip details are ESP32-S3 QFN56 revision v0.2, 16 MB flash, 8 MB embedded PSRAM (AP_3v3), and a 40 MHz crystal. The exact carrier-board model is not yet identified. INMP441 GPIO4/5/6 remains provisional. BLE discovery, connection, GATT discovery, and Status read are recorded; Control PING/PONG and Audio notifications remain pending. The 2026-11-09 INMP441 I²S diagnostic passed driver initialization but did not establish stable valid PCM: zero-data windows, intermittent raw data, and clipping warnings remain under investigation. See the [I²S test report](ESP32-S3/docs/I2S_TEST_REPORT.md), [board/GPIO record](ESP32-S3/docs/HARDWARE_CONFIGURATION.md) and [command reference](ESP32-S3/docs/COMMAND_REFERENCE.md). This track does not replace or modify the historical ESP8266 and ESP32-C3 implementations.
 
 ## Architecture Diagram
 
