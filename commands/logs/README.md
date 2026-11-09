@@ -15,6 +15,7 @@ Examples:
 - `2026-11-06_esp32-s3_ble-status-read.log`
 - `2026-11-07_esp8266_serial-bringup.log`
 - `2026-11-07_host_python-tests.log`
+- `2026-11-09_esp32-s3_inmp441-i2s-diagnostic.log`
 
 ## Capture a command transcript
 
