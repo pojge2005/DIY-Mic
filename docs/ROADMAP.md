@@ -130,8 +130,8 @@ This is a separate experimental track and does not change the historical ESP8266
 | S3-03 | Status characteristic read | PASS — `CONNECTED` |
 | S3-04 | Control write and PING/PONG | Pending evidence |
 | S3-05 | Audio characteristic notifications | Pending evidence |
-| S3-06 | Confirm I²S wiring and capture | Not started / not evidenced |
+| S3-06 | Confirm I²S wiring and capture | BLOCKED — driver init passes; stable aligned PCM and physical wiring are not verified |
 | S3-07 | Measure BLE throughput, latency, packet loss and power | Not started |
 | S3-08 | Validate Android and PC receiver behavior | Not started |
 
-The board-specific files and test tools are under [ESP32-S3/](../ESP32-S3/). Chip identification is recorded, but exact carrier-board identity and final GPIO mapping remain open. Project commands are indexed in the [command library](../commands/README.md), with a detailed [ESP32-S3 command guide](../commands/ESP32-S3.md) and dated [terminal logs](../commands/logs/README.md). Do not mark later steps complete until test evidence is recorded.
+The board-specific files and test tools are under [ESP32-S3/](../ESP32-S3/). The 2026-11-09 I²S diagnostic is documented in [I²S Test Report](../ESP32-S3/docs/I2S_TEST_REPORT.md): driver initialization passed, but intermittent zero-data windows and inconsistent raw sample alignment prevent acceptance of valid PCM. Exact carrier-board identity, physical wiring, supply voltage, and final GPIO mapping remain open. Project commands are indexed in the [command library](../commands/README.md), with a detailed [ESP32-S3 command guide](../commands/ESP32-S3.md) and dated [terminal logs](../commands/logs/README.md). Do not mark later steps complete until test evidence is recorded.

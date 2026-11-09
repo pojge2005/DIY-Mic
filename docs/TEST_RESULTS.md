@@ -39,3 +39,22 @@ The delay result is subjective; no end-to-end latency measurement has been recor
 5. Record audio observations and firmware version for each test.
 
 Do not treat unmeasured values as verified specifications.
+
+
+## ESP32-S3 — INMP441 I²S diagnostic
+
+**Test date:** 2026-11-09 (exact capture time not supplied)  
+**Platform:** reported ESP32-S3 N16R8 + INMP441, Ubuntu serial monitor
+
+| Check | Result |
+|---|---|
+| I²S driver initialization | PASS |
+| Intermittent non-zero raw words | Observed |
+| Stable capture | FAIL / NOT VERIFIED |
+| Raw sample alignment | NOT VERIFIED |
+| Clean PCM audio | NOT VERIFIED |
+| Physical GPIO and supply validation | BLOCKED |
+
+The supplied output showed intermittent zero-data windows, non-zero raw words with inconsistent low-byte patterns, and repeated clipping warnings after the candidate sample shift. The evidence does not establish whether the warnings are actual microphone clipping or an I²S data-format/electrical issue.
+
+See [ESP32-S3 I²S Test Report](../ESP32-S3/docs/I2S_TEST_REPORT.md) and [supplied serial log](../commands/logs/2026-11-09_esp32-s3_inmp441-i2s-diagnostic.log). This result is separate from the historical ESP8266 V0.5 Android test.

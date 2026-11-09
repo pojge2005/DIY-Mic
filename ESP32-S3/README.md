@@ -30,6 +30,7 @@ ESP32-S3/
 │   ├── COMMAND_REFERENCE.md
 │   ├── DEVELOPMENT_LOG.md
 │   ├── HARDWARE_CONFIGURATION.md
+│   ├── I2S_TEST_REPORT.md
 │   └── KNOWN_ISSUES.md
 └── tests/
     ├── README.md
@@ -51,6 +52,19 @@ ESP32-S3/
 | Audio playback | NOT TESTED |
 
 The recorded Status read was `43 4f 4e 4e 45 43 54 45 44` (ASCII `CONNECTED`).
+
+## I²S microphone status
+
+| Test | Status |
+|---|---|
+| I²S driver initialization | PASS |
+| Non-zero raw data | Intermittently observed |
+| Stable capture | FAIL / NOT VERIFIED |
+| 24-bit alignment and `raw >> 8` conversion | NOT VERIFIED |
+| Clean PCM audio | NOT VERIFIED |
+| Physical GPIO and supply verification | BLOCKED |
+
+The 2026-11-09 diagnostic showed zero-data intervals, intermittent non-zero words, and repeated values at the candidate 24-bit limits. Do not treat the current capture as valid PCM or integrate it into BLE audio yet. See [INMP441 I²S Diagnostic Report](docs/I2S_TEST_REPORT.md) and the [supplied serial output](../commands/logs/2026-11-09_esp32-s3_inmp441-i2s-diagnostic.log).
 
 ## Command documentation
 
@@ -78,6 +92,7 @@ This track currently documents BLE bring-up and host-side test tools. It is not 
 ## Reports
 
 - [BLE Test Report](docs/BLE_TEST_REPORT.md)
+- [INMP441 I²S Diagnostic Report](docs/I2S_TEST_REPORT.md)
 - [GATT Specification](docs/BLE_GATT_SPECIFICATION.md)
 - [Development Log](docs/DEVELOPMENT_LOG.md)
 - [Known Issues](docs/KNOWN_ISSUES.md)

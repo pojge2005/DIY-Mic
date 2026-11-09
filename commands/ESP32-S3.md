@@ -149,3 +149,22 @@ The script reads Status, subscribes to Status and Audio if the live properties p
 ## 7. Save evidence
 
 After each test, save the exact command and complete output under [commands/logs](logs/README.md). Record the date/time, board marking, firmware commit, host/tool versions, characteristic UUID, and result. Update [BLE Test Report](../ESP32-S3/docs/BLE_TEST_REPORT.md) only after reviewing the raw log.
+
+
+## 8. INMP441 I²S serial diagnostic
+
+Run in the ESP32-S3 firmware project directory that contains the diagnostic `platformio.ini`:
+
+```bash
+pio run
+pio run -t upload
+pio device monitor -p /dev/ttyACM0 -b 115200
+```
+
+| Command | Purpose | Use case |
+|---|---|---|
+| `pio run` | Compile the selected diagnostic firmware | Check the diagnostic build |
+| `pio run -t upload` | Upload the diagnostic firmware | Run the I²S capture test on the board |
+| `pio device monitor -p /dev/ttyACM0 -b 115200` | Open serial output | Inspect I²S initialization, raw words, and slot statistics |
+
+The 2026-11-09 supplied output showed I²S initialization PASS but did not establish stable valid PCM. See [INMP441 I²S Diagnostic Report](../ESP32-S3/docs/I2S_TEST_REPORT.md). GPIO4/5/6 remains provisional. The temporary diagnostic firmware is not a production audio implementation.

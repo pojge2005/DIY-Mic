@@ -1,0 +1,215 @@
+# ESP32-S3 INMP441 I²S Diagnostic — Supplied Serial Output
+
+- Date: 2026-11-09 (exact capture time not supplied).
+- Host: Ubuntu.
+- Serial port: `/dev/ttyACM0`.
+- Serial monitor baud: 115200.
+- Target: reported ESP32-S3 N16R8 + INMP441.
+- Test mode: I²S master RX, 16 kHz, 32-bit slots, RIGHT_LEFT.
+- Firmware commit: not recorded.
+- Source: serial output pasted by the project owner into the engineering session.
+- Capture limitation: this is the supplied serial output, not a complete shell/build/upload transcript. No missing command output has been reconstructed.
+
+## Supplied output
+
+```text
+Disconnected ([Errno 5] Input/output error)
+Reconnecting to /dev/ttyACM0 .   Connected!
+
+================================
+     INMP441 I2S DIAGNOSTIC
+================================
+Sample rate: 16000 Hz
+Sample format: 32-bit I2S
+Channel mode: RIGHT + LEFT
+Raw dump: 32 words
+Starting microphone capture...
+
+I2S initialization: PASS
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16000 | MIN: 0 | MAX: 0 | RMS: 0.00
+SLOT A (even words): ZERO DATA
+SLOT B (odd words) | Samples: 16000 | MIN: 0 | MAX: 0 | RMS: 0.00
+SLOT B (odd words): ZERO DATA
+------------------------------------
+
+========== RAW I2S DATA ==========
+WORD[213] 0x00000000 | SHIFTED: 0
+WORD[214] 0x00000000 | SHIFTED: 0
+WORD[215] 0x00000000 | SHIFTED: 0
+WORD[216] 0x00000000 | SHIFTED: 0
+WORD[217] 0x00000000 | SHIFTED: 0
+WORD[218] 0x00000000 | SHIFTED: 0
+WORD[219] 0x00000000 | SHIFTED: 0
+WORD[220] 0x00000000 | SHIFTED: 0
+WORD[221] 0x00000007 | SHIFTED: 0
+WORD[222] 0xFFFFFFFE | SHIFTED: -1
+WORD[223] 0xFDFFFBF7 | SHIFTED: -131077
+WORD[224] 0xFFFFFFFE | SHIFTED: -1
+WORD[225] 0xBFFF5D58 | SHIFTED: -4194467
+WORD[226] 0x00000000 | SHIFTED: 0
+WORD[227] 0x00000007 | SHIFTED: 0
+WORD[228] 0xFFFFFFFE | SHIFTED: -1
+WORD[229] 0xEABAF6A8 | SHIFTED: -1393930
+WORD[230] 0x00000000 | SHIFTED: 0
+WORD[231] 0x00000005 | SHIFTED: 0
+WORD[232] 0xFFFFFFFE | SHIFTED: -1
+WORD[233] 0xAAEADEB0 | SHIFTED: -5575970
+WORD[234] 0x00000000 | SHIFTED: 0
+WORD[235] 0x00000005 | SHIFTED: 0
+WORD[236] 0xFFFFFFFE | SHIFTED: -1
+WORD[237] 0xAAAAAAA8 | SHIFTED: -5592406
+WORD[238] 0x00000000 | SHIFTED: 0
+WORD[239] 0x00000005 | SHIFTED: 0
+WORD[240] 0xFFFFFFFE | SHIFTED: -1
+WORD[241] 0xAAAAAAA8 | SHIFTED: -5592406
+WORD[242] 0x00000000 | SHIFTED: 0
+WORD[243] 0x00000005 | SHIFTED: 0
+WORD[244] 0xFFFFFFFE
+========== END RAW DATA ==========
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: -1082402 | MAX: 0 | RMS: 9171.39
+SLOT A (even words): Signal data received
+SLOT B (odd words) | Samples: 16128 | MIN: -5592406 | MAX: 5592407 | RMS: 147090.09
+SLOT B (odd words): Signal data received
+------------------------------------
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: -8388608 | MAX: 8384509 | RMS: 3793251.04
+SLOT A (even words): POSSIBLE CLIPPING
+SLOT B (odd words) | Samples: 16128 | MIN: -8388608 | MAX: 8383829 | RMS: 586996.15
+SLOT B (odd words): POSSIBLE CLIPPING
+------------------------------------
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: -8388608 | MAX: 6116693 | RMS: 587117.37
+SLOT A (even words): POSSIBLE CLIPPING
+SLOT B (odd words) | Samples: 16128 | MIN: 0 | MAX: 0 |RMS: 0.00
+SLOT B (odd words): ZERO DATA
+------------------------------------
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: 0 | MAX: 0 | RMS: 0.00
+SLOT A (even words): ZERO DATA
+SLOT B (odd words) | Samples: 16128 | MIN: 0 | MAX: 0 |RMS: 0.00
+SLOT B (odd words): ZERO DATA
+------------------------------------
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: -8306687 | MAX: 6985002 | RMS: 439294.05
+SLOT A (even words): POSSIBLE CLIPPING
+SLOT B (odd words) | Samples: 16128 | MIN: 0 | MAX: 0 |RMS: 0.00
+SLOT B (odd words): ZERO DATA
+------------------------------------
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: -8388480 | MAX: 5592405 | RMS: 431725.53
+SLOT A (even words): POSSIBLE CLIPPING
+SLOT B (odd words) | Samples: 16128 | MIN: 0 | MAX: 0 |RMS: 0.00
+SLOT B (odd words): ZERO DATA
+------------------------------------
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: -8388608 | MAX: 8388607 | RMS: 2854452.50
+SLOT A (even words): POSSIBLE CLIPPING
+SLOT B (odd words) | Samples: 16128 | MIN: -8388608 | MAX: 8388607 | RMS: 1294095.09
+SLOT B (odd words): POSSIBLE CLIPPING
+------------------------------------
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: -8388608 | MAX: 8322933 | RMS: 3563587.39
+SLOT A (even words): POSSIBLE CLIPPING
+SLOT B (odd words) | Samples: 16128 | MIN: -8388608 | MAX: 8220330 | RMS: 963099.39
+SLOT B (odd words): POSSIBLE CLIPPING
+------------------------------------
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: -8388608 | MAX: 8372159 | RMS: 2869077.54
+SLOT A (even words): POSSIBLE CLIPPING
+SLOT B (odd words) | Samples: 16128 | MIN: -8388608 | MAX: 7965313 | RMS: 573405.62
+SLOT B (odd words): POSSIBLE CLIPPING
+------------------------------------
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: -8388608 | MAX: 7344384 | RMS: 2553235.28
+SLOT A (even words): POSSIBLE CLIPPING
+SLOT B (odd words) | Samples: 16128 | MIN: 0 | MAX: 0 |RMS: 0.00
+SLOT B (odd words): ZERO DATA
+------------------------------------
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: -8388608 | MAX: 6990506 | RMS: 1996029.86
+SLOT A (even words): POSSIBLE CLIPPING
+SLOT B (odd words) | Samples: 16128 | MIN: 0 | MAX: 0 |RMS: 0.00
+SLOT B (odd words): ZERO DATA
+------------------------------------
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: -8388608 | MAX: 6990485 | RMS: 1412501.87
+SLOT A (even words): POSSIBLE CLIPPING
+SLOT B (odd words) | Samples: 16128 | MIN: 0 | MAX: 0 |RMS: 0.00
+SLOT B (odd words): ZERO DATA
+------------------------------------
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: -8388608 | MAX: 7689557 | RMS: 796143.98
+SLOT A (even words): POSSIBLE CLIPPING
+SLOT B (odd words) | Samples: 16128 | MIN: 0 | MAX: 0 |RMS: 0.00
+SLOT B (odd words): ZERO DATA
+------------------------------------
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: -8323072 | MAX: 5242944 | RMS: 164466.65
+SLOT A (even words): POSSIBLE CLIPPING
+SLOT B (odd words) | Samples: 16128 | MIN: 0 | MAX: 0 |RMS: 0.00
+SLOT B (odd words): ZERO DATA
+------------------------------------
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: -6280704 | MAX: 4194304 | RMS: 63508.11
+SLOT A (even words): Signal data received
+SLOT B (odd words) | Samples: 16128 | MIN: 0 | MAX: 0 |RMS: 0.00
+SLOT B (odd words): ZERO DATA
+------------------------------------
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: -8388608 | MAX: 5505344 | RMS: 176939.84
+SLOT A (even words): POSSIBLE CLIPPING
+SLOT B (odd words) | Samples: 16128 | MIN: 0 | MAX: 0 |RMS: 0.00
+SLOT B (odd words): ZERO DATA
+------------------------------------
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: -8388608 | MAX: 6334800 | RMS: 548649.07
+SLOT A (even words): POSSIBLE CLIPPING
+SLOT B (odd words) | Samples: 16128 | MIN: -8322395 | MAX: 5690709 | RMS: 104725.31
+SLOT B (odd words): POSSIBLE CLIPPING
+------------------------------------
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: -8355776 | MAX: 8388607 | RMS: 1891009.96
+SLOT A (even words): POSSIBLE CLIPPING
+SLOT B (odd words) | Samples: 16128 | MIN: -8388608 | MAX: 8372191 | RMS: 1462504.43
+SLOT B (odd words): POSSIBLE CLIPPING
+------------------------------------
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: -8388608 | MAX: 8388603 | RMS: 1897254.54
+SLOT A (even words): POSSIBLE CLIPPING
+SLOT B (odd words) | Samples: 16128 | MIN: -8388608 | MAX: 8367573 | RMS: 1744004.79
+SLOT B (odd words): POSSIBLE CLIPPING
+------------------------------------
+
+---------- CHANNEL REPORT ----------
+SLOT A (even words) | Samples: 16128 | MIN: -8380408 | MAX: 8388607 | RMS: 1493347.04
+SLOT A (even words): POSSIBLE CLIPPING
+SLOT B (odd words) | Samples: 16128 | MIN: -8388608 | MAX: 8350373 | RMS: 1316674.44
+SLOT B (odd words): POSSIBLE CLIPPING
+------------------------------------
+```
+
+## Result
+
+The I²S driver initialization passed, but stable valid microphone PCM was not demonstrated. See [the I²S test report](../../ESP32-S3/docs/I2S_TEST_REPORT.md) for interpretation and next actions.

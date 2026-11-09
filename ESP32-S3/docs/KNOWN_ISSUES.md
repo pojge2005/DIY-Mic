@@ -11,8 +11,13 @@
 
 - GPIO4=BCLK, GPIO5=WS/LRCLK, GPIO6=SD/DOUT is provisional.
 - Physical board pinout has not been checked.
-- INMP441 supply, breakout decoupling, L/R selection, and final wiring need confirmation.
-- I²S capture is not evidenced in the BLE report.
+- INMP441 supply voltage at the module, breakout decoupling, L/R selection, and final wiring need physical confirmation.
+- The 2026-11-09 I²S diagnostic initialized the driver but observed intermittent zero-data windows and intermittent non-zero words.
+- Even/odd slot statistics alternated between active and zero-data periods; slot-to-channel mapping is not confirmed.
+- Several raw words had non-zero least-significant bytes, so the assumed 24-bit left-aligned format and `raw >> 8` conversion are not verified.
+- Repeated values near signed 24-bit extrema triggered clipping warnings; actual microphone clipping versus invalid data interpretation is unresolved.
+- Stable, clean PCM audio and a controlled quiet-versus-speech response have not been demonstrated.
+- See [INMP441 I²S Diagnostic Report](I2S_TEST_REPORT.md) and [supplied serial log](../../commands/logs/2026-11-09_esp32-s3_inmp441-i2s-diagnostic.log).
 
 ## BLE
 
